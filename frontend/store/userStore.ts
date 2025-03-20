@@ -18,6 +18,7 @@ export const useUserStore = defineStore('user', {
       // Supprimer le token du cookie
       const token = useCookie('auth.token');
       token.value = null;
+      window.location.reload();
     },
     async checkAuth() {
       const token = useCookie('auth.token')

@@ -72,7 +72,7 @@ async function onSubmit(event: FormSubmitEvent<any>) {
     if (data.first_login) {
       navigateTo('/onboarding/actors') // Redirection vers l'onboarding
     } else {
-      navigateTo('/dashboard')
+      navigateTo('/')
     }
 
   } catch (error: any) {
