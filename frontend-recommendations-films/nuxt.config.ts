@@ -1,7 +1,8 @@
 export default defineNuxtConfig({
   modules: [
     '@pinia/nuxt',
-    '@sidebase/nuxt-auth' // Si tu utilises l'authentification
+    '@sidebase/nuxt-auth',
+    '@nuxt/ui'
   ],
 
   runtimeConfig: {

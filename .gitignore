@@ -1,0 +1,45 @@
+# 📌 Ignorer les fichiers système et IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 📌 Ignorer les logs et fichiers temporaires
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+pnpm-error.log*
+*.log
+
+# 📌 Ignorer les environnements et fichiers sensibles
+.env
+.env.*.local
+
+# 📌 Ignorer les dépendances et builds du backend
+backend/node_modules/
+backend/.venv/
+backend/__pycache__/
+backend/db.sqlite3
+backend/.mypy_cache/
+backend/.pytest_cache/
+backend/.cache/
+
+# 📌 Ignorer les dépendances et builds du frontend
+frontend-recommendations-films/node_modules/
+frontend-recommendations-films/.nuxt/
+frontend-recommendations-films/.output/
+frontend-recommendations-films/.nitro/
+frontend-recommendations-films/.pnpm-store/
+frontend-recommendations-films/.pnp/
+frontend-recommendations-films/.pnp.js
+frontend-recommendations-films/dist/
+frontend-recommendations-films/.eslintcache
+frontend-recommendations-films/.prettier_cache
+frontend-recommendations-films/coverage/
+frontend-recommendations-films/public/uploads/
+
+# 📌 Ignorer les lockfiles (si tu veux éviter de forcer un lockfile spécifique)
+yarn.lock
+package-lock.json
