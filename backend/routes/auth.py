@@ -20,14 +20,15 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     new_user = User(
         username=user.username.strip(), 
         email=user.email.strip(),
-        password_hash=hashed_password
+        password_hash=hashed_password,
+        first_login=True
     )    
     
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
     
-    return {"id": new_user.user_id, "username": new_user.username, "email": new_user.email} 
+    return {"id": new_user.user_id, "username": new_user.username, "email": new_user.email, "first_login": new_user.first_login} 
 
 # 🔹 Connexion d'un utilisateur (génération d'un token JWT)
 @router.post("/login")
@@ -36,8 +37,16 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     if not user or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Email ou mot de passe incorrect")
 
+    # Vérifier si c'est la première connexion
+    first_login = user.first_login
+
+    # Mettre `first_login = False` en base de données après connexion
+    if user.first_login:
+        user.first_login = False
+        db.commit()
+
     access_token = create_access_token(data={"sub": str(user.user_id)}, expires_delta=timedelta(minutes=60))
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token, "token_type": "bearer", "id": user.user_id, "username": user.username, "email": user.email, "first_login": first_login}
 
 # 🔹 Récupérer les infos de l'utilisateur connecté
 @router.get("/me", response_model=UserResponse)

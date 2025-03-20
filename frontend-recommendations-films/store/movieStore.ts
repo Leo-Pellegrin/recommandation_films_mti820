@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia'
-import type { AxiosInstance } from 'axios'
 
 interface Movie {
   id: number
@@ -14,13 +13,13 @@ export const useMovieStore = defineStore('movie', {
   }),
   actions: {
     async fetchMovies() {
-      const { $api } = useNuxtApp() as { $api: AxiosInstance }
-      try {
-        const response = await $api.get<Movie[]>('/movies')
-        this.movies = response.data
-      } catch (error) {
-        console.error('Erreur lors de la récupération des films', error)
-      }
+      // const { $api } = useNuxtApp()
+      // try {
+      //   const response = await $api.get<Movie[]>('/movies')
+      //   this.movies = response.data
+      // } catch (error) {
+      //   console.error('Erreur lors de la récupération des films', error)
+      // }
     },
   },
 })

@@ -19,7 +19,7 @@ class MovieResponse(MovieBase):
 class UserCreate(BaseModel):
     username: str
     email: str
-    password: str  # On récupère le mot de passe en clair (il sera hashé ensuite)
+    password: str  
 
 class UserResponse(BaseModel):
     id: int

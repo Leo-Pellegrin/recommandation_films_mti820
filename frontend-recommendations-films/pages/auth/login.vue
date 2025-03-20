@@ -1,49 +1,78 @@
 <script setup lang="ts">
-const form = ref({
+import type { FormSubmitEvent, FormError } from '@nuxt/ui'
+
+// État réactif du formulaire
+const state = reactive({
   email: '',
-  password: '',
-  rememberMe: false
+  password: ''
 })
 
-const login = async () => {
+// Fonction de validation manuelle
+const validate = (state: any): FormError[] => {
+  const errors: FormError[] = []
+
+  if (!state.email) {
+    errors.push({ name: 'email', message: 'Email is required' })
+  } else if (!/\S+@\S+\.\S+/.test(state.email)) {
+    errors.push({ name: 'email', message: 'Invalid email format' })
+  }
+
+  if (!state.password) {
+    errors.push({ name: 'password', message: 'Password is required' })
+  } else if (state.password.length < 8) {
+    errors.push({ name: 'password', message: 'Password must be at least 8 characters' })
+  }
+
+  return errors
+}
+
+// Toast notifications
+const toast = useToast()
+const loading = ref(false)
+
+// Soumission du formulaire
+async function onSubmit(event: FormSubmitEvent<any>) {
+  loading.value = true
   try {
-    // Appel API pour se connecter
     const { $api } = useNuxtApp()
-    const response = await $api.post('/auth/login', form)
-    console.log('Connexion réussie', response.data)
+    const response = await $api.post('/auth/login', {
+      email: state.email,
+      password: state.password
+    })
+
+    localStorage.setItem('token', response.data.token)
+
+    toast.add({ title: 'Login Successful', description: 'Redirecting...', color: 'success' })
+
+    setTimeout(() => {
+      navigateTo('/')
+    }, 1500)
   } catch (error) {
-    console.error('Erreur de connexion', error)
+    toast.add({ title: 'Error', description: 'Invalid credentials', color: 'error' })
+  } finally {
+    loading.value = false
   }
 }
 </script>
 
 <template>
-  <div class="auth-container">
-    <h1>Sign in</h1>
-    <form @submit.prevent="login">
-      <label>Email address</label>
-      <input v-model="form.email" type="email" required />
-      
-      <label>Password</label>
-      <input v-model="form.password" type="password" required />
-      
-      <div>
-        <input v-model="form.rememberMe" type="checkbox" />
-        <span>Remember me</span>
-      </div>
+  <UCard class="max-w-md mx-auto mt-10">
+    <template #header>
+      <h2 class="text-xl font-semibold text-center">Sign In</h2>
+    </template>
 
-      <button type="submit">Sign In</button>
-      <p>Don't have an account? <NuxtLink to="/auth/register">Sign up here</NuxtLink></p>
-    </form>
-  </div>
+    <UForm :validate="validate" :state="state" class="space-y-4" @submit="onSubmit">
+      <UFormField label="Email" name="email">
+        <UInput v-model="state.email" placeholder="Enter your email" />
+      </UFormField>
+
+      <UFormField label="Password" name="password">
+        <UInput v-model="state.password" type="password" placeholder="Enter your password" />
+      </UFormField>
+
+      <UButton type="submit" block :loading="loading">
+        Sign In
+      </UButton>
+    </UForm>
+  </UCard>
 </template>
-
-<style scoped>
-.auth-container {
-  width: 300px;
-  margin: auto;
-  padding: 20px;
-  background: #000;
-  color: white;
-}
-</style>

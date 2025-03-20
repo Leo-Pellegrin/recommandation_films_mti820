@@ -1,22 +1,22 @@
-interface Movie {
-  id: number
-  title: string
-  poster: string
-  rating: number
-}
+// interface Movie {
+//   id: number
+//   title: string
+//   poster: string
+//   rating: number
+// }
 
-export function useFetchMovies(): { movies: Ref<Movie[]>; fetchMovies: () => Promise<void> } {
-  const movies = ref<Movie[]>([])
+// export function useFetchMovies(): { movies: Ref<Movie[]>; fetchMovies: () => Promise<void> } {
+//   const movies = ref<Movie[]>([])
 
-  async function fetchMovies() {
-    const { $api } = useNuxtApp()
-    try {
-      const response = await $api.get('/movies')
-      movies.value = response.data
-    } catch (error) {
-      console.error('Erreur lors de la récupération des films', error)
-    }
-  }
+//   async function fetchMovies() {
+//     const { $api } = useNuxtApp()
+//     try {
+//       const response = await $api.get('/movies')
+//       movies.value = response.data
+//     } catch (error) {
+//       console.error('Erreur lors de la récupération des films', error)
+//     }
+//   }
 
-  return { movies, fetchMovies }
-}
+//   return { movies, fetchMovies }
+// }

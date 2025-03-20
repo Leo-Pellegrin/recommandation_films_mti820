@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, ARRAY, DateTime, Float
+from sqlalchemy import Column, Integer, String, ForeignKey, ARRAY, DateTime, Float, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import TEXT
 from database import Base
@@ -20,6 +20,7 @@ class User(Base):
     username = Column(String, unique=True, index=True, nullable=True)
     email = Column(String, unique=True, index=True, nullable=True)
     password_hash = Column(String, nullable=True)
+    first_login = Column(Boolean, nullable=True)
 
     # preferences = relationship("UserPreferences", back_populates="user", uselist=False)
 
