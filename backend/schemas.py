@@ -1,0 +1,56 @@
+from pydantic import BaseModel, ConfigDict
+from typing import List
+
+class MovieBase(BaseModel):
+    title: str
+    year: int
+    genres: List[str]  # Tableau JSON
+
+
+class MovieCreate(MovieBase):
+    pass  # Aucun champ supplémentaire
+
+class MovieResponse(MovieBase):
+    movie_id: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+        
+class UserCreate(BaseModel):
+    username: str
+    email: str
+    password: str  # On récupère le mot de passe en clair (il sera hashé ensuite)
+
+class UserResponse(BaseModel):
+    id: int
+    username: str
+    email: str
+    
+    model_config = ConfigDict(from_attributes=True)
+
+class RatingCreate(BaseModel):
+    user_id: int
+    movie_id: int
+    rating: float
+
+class RatingResponse(RatingCreate):
+    id: int
+    
+    model_config = ConfigDict(from_attributes=True)
+
+
+class LinkCreate(BaseModel):
+    movie_id: int
+    imdb_id: int
+    tmdb_id: int
+
+class LinkResponse(LinkCreate):
+    model_config = ConfigDict(from_attributes=True)
+
+        
+class UserPreferencesCreate(BaseModel):
+    user_id: int
+    favorite_genres: List[str]
+
+class UserPreferencesResponse(UserPreferencesCreate):
+    model_config = ConfigDict(from_attributes=True)
