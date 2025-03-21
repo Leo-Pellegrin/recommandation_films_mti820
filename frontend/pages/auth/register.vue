@@ -2,7 +2,8 @@
 import type { FormSubmitEvent, FormError } from '@nuxt/ui'
 
 definePageMeta({
-  layout: 'auth'
+  layout: 'auth',
+  middleware: 'guest'
 })
 
 // État réactif du formulaire
@@ -74,7 +75,8 @@ async function onSubmit(event: FormSubmitEvent<any>) {
       toast.add({ title: 'Success', description: 'Account created! Redirecting...', color: 'success' })
       setTimeout(() => {
         navigateTo('/auth/login')
-      }, 1500);
+        toast.clear()
+      }, 3000);
 
     }
 
@@ -95,35 +97,52 @@ async function onSubmit(event: FormSubmitEvent<any>) {
 </script>
 
 <template>
-  <UCard class="max-w-md mx-auto mt-10">
+  <UCard class="max-w-2xl mx-auto bg-gray-200 border-2 border-gray-600 p-12 rounded-3xl shadow-2xl">
     <template #header>
-      <h2 class="text-xl font-semibold text-center">Sign Up</h2>
+      <h2 class="text-4xl font-extrabold text-left text-black">Sign Up</h2>
     </template>
 
-    <UForm :validate="validate" :state="state" class="space-y-4" @submit="onSubmit">
-      <UFormField label="Full Name" name="name">
-        <UInput v-model="state.name" placeholder="Enter your full name" />
+    <UForm :validate="validate" :state="state" class="space-y-8" @submit="onSubmit">
+      <UFormField label="Full Name" name="name" class="w-full text-2xl mt-6 formfield">
+        <UInput v-model="state.name" placeholder="Enter your full name" size="xl"
+          :ui="{ base: 'px-6 py-4 text-lg rounded-xl' }" class="mt-4 w-full rounded-2xl" />
       </UFormField>
 
-      <UFormField label="Email" name="email">
-        <UInput v-model="state.email" type="email" placeholder="Enter your email" />
+      <UFormField label="Email address" name="email" class="w-full text-2xl">
+        <UInput v-model="state.email" type="email" placeholder="Enter your email" size="xl"
+          :ui="{ base: 'px-6 py-4 text-xl rounded-xl' }" class=" mt-4 w-full  rounded-2xl" />
       </UFormField>
 
-      <UFormField label="Password" name="password">
-        <UInput v-model="state.password" type="password" placeholder="Enter your password" />
+      <UFormField label="Password" name="password" class="w-full text-2xl">
+        <UInput v-model="state.password" type="password" placeholder="Enter your password" size="xl"
+          :ui="{ base: 'px-6 py-4 text-xl rounded-xl' }" class="mt-4 w-full rounded-2xl" />
       </UFormField>
 
-      <UFormField label="Confirm Password" name="confirmPassword">
-        <UInput v-model="state.confirmPassword" type="password" placeholder="Confirm your password" />
+      <UFormField label="Confirm Password" name="confirmPassword" class="w-full text-2xl">
+        <UInput v-model="state.confirmPassword" type="password" placeholder="Confirm your password" size="xl"
+          :ui="{ base: 'px-6 py-4 text-xl rounded-xl' }" class="mt-4 w-full rounded-2xl" />
       </UFormField>
 
-      <UButton type="submit" block :loading="loading">
+      <UButton type="submit" block :loading="loading" size="xl"
+        class="py-2 text-2xl font-bold rounded-2xl bg-orange-400 hover:bg-orange-600 transition-all">
         Sign Up
       </UButton>
-
     </UForm>
-    <p class="text-sm text-center">
-      Already have an account? <NuxtLink to="/auth/login" class="text-primary">Sign in</NuxtLink>
+
+    <p class="text-center text-2xl text-black mt-6">
+      Already have an account?
+      <NuxtLink to="/auth/login" class="text-orange-600 hover:underline text-2xl font-semibold">
+        Sign in now!
+      </NuxtLink>
     </p>
   </UCard>
 </template>
+
+<style scoped>
+/* Styles scopés pour les messages d'erreur dans ce composant */
+.u-form-field p {
+  font-size: 1.25rem;
+  color: #e53e3e;
+  font-weight: bold;
+}
+</style>

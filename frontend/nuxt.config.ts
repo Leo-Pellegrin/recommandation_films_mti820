@@ -8,6 +8,7 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@sidebase/nuxt-auth',
     '@nuxt/ui',
+    'pinia-plugin-persistedstate/nuxt'
   ],
   css: ['~/assets/css/main.css'],
   vite: {
@@ -21,29 +22,32 @@ export default defineNuxtConfig({
     disableServerSideAuth: false, // Permet l'auth côté serveur (décocher si tu veux uniquement côté client)
 
     sessionRefresh: {
-      enablePeriodically: false, 
-      enableOnWindowFocus: false, 
+      enablePeriodically: false,
+      enableOnWindowFocus: false,
     },
     provider: {
       type: 'local',
-      endpoints: {       
+      endpoints: {
         signUp: { path: '/register', method: 'post' },
         getSession: { path: '/me', method: 'get' }
       },
       pages: {
         login: '/auth/login',
-      },  
-    token: {
-      signInResponseTokenPointer: "/access_token", // ✅ Indique où récupérer le token dans la réponse API
-      type: "Bearer",
-      cookieName: "auth.token", 
-      headerName: "Authorization",
-      maxAgeInSeconds: 1800, 
-      sameSiteAttribute: "lax",
-      cookieDomain: "localhost",
-      secureCookieAttribute: false, 
-      httpOnlyCookieAttribute: false,
+      },
+      token: {
+        signInResponseTokenPointer: "/access_token", // Indique où récupérer le token dans la réponse API
+        type: "Bearer",
+        cookieName: "auth.token",
+        headerName: "Authorization",
+        maxAgeInSeconds: 1800,
+        sameSiteAttribute: "lax",
+        cookieDomain: "localhost",
+        secureCookieAttribute: false,
+        httpOnlyCookieAttribute: false,
+      },
     },
-    },
-  }
+  },
+  pinia: {
+    storesDirs: ['./stores/**'],
+  },
 })

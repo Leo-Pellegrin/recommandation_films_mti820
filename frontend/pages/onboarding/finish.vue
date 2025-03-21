@@ -2,7 +2,7 @@
 const router = useRouter()
 
 function nextStep() {
-  router.push('/onboarding/finish')
+  router.push('/')
 }
 
 definePageMeta({

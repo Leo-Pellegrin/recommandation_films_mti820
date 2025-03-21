@@ -38,13 +38,12 @@ export const useUserStore = defineStore('user', {
         const auth = useAuth()
         const session = await auth.getSession() // 🔹 Fait un seul appel à `/me`
 
-        // if (session?.user) {
-        //   this.isAuthenticated = true
-        //   this.user = session.user
-        // } else {
-        //   this.isAuthenticated = false
-        //   this.user = null
-        // }
+        if (session) {
+          this.isAuthenticated = true
+        } else {
+          this.isAuthenticated = false
+          this.user = null
+        }
 
         this.checkedSession = true // ✅ Marquer la session comme vérifiée
       } catch (error) {
@@ -53,5 +52,8 @@ export const useUserStore = defineStore('user', {
         this.user = null
       }
     },
-  }
+  },
+  persist: {
+    storage: piniaPluginPersistedstate.localStorage(),
+  },
 })

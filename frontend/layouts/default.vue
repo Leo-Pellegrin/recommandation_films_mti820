@@ -42,8 +42,8 @@ async function logout() {
       </nav>
     </header>
 
-    <main class="p-4">
-      <slot /> <!-- 🔹 Affiche la page actuelle ici -->
+    <main class="p-4 bg-black text-white ">
+      <slot />
     </main>
   </div>
 </template>

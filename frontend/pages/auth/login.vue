@@ -26,8 +26,6 @@ const validate = (state: any): FormError[] => {
 
   if (!state.password) {
     errors.push({ name: 'password', message: 'Password is required' })
-  } else if (state.password.length < 8) {
-    errors.push({ name: 'password', message: 'Password must be at least 8 characters' })
   }
 
   return errors
@@ -70,9 +68,9 @@ async function onSubmit(event: FormSubmitEvent<any>) {
 
     // Vérifier `first_login` et rediriger
     if (data.first_login) {
-      navigateTo('/onboarding/actors') // Redirection vers l'onboarding
+      navigateTo('/onboarding/genres') // Redirection vers l'onboarding
     } else {
-      navigateTo('/')
+      window.location.reload() // Recharger la page actuelle
     }
 
   } catch (error: any) {
@@ -86,25 +84,32 @@ async function onSubmit(event: FormSubmitEvent<any>) {
 </script>
 
 <template>
-  <UCard class="max-w-md mx-auto mt-10">
+  <UCard class="max-w-2xl mx-auto bg-gray-200 border-2 border-gray-600 p-12 rounded-3xl shadow-2xl">
     <template #header>
-      <h2 class="text-xl font-semibold text-center">Sign In</h2>
+      <h2 class="text-4xl font-extrabold text-left text-black">Sign In</h2>
     </template>
 
-    <UForm :validate="validate" :state="state" class="space-y-4" @submit="onSubmit">
-      <UFormField label="Email" name="username">
-        <UInput v-model="state.email" placeholder="Enter your email" />
+    <UForm :validate="validate" :state="state" class="space-y-8" @submit="onSubmit">
+      <UFormField label="Email" name="username" class="w-full text-3xl mt-6">
+        <UInput v-model="state.email" placeholder="Enter your email" size="xl" :ui="{ base: 'px-6 py-4 text-xl rounded-xl' }" 
+          class="w-full mt-4 rounded-2xl" />
       </UFormField>
 
-      <UFormField label="Password" name="password">
-        <UInput v-model="state.password" type="password" placeholder="Enter your password" />
+      <UFormField label="Password" name="password" class="w-full text-3xl">
+        <UInput v-model="state.password" type="password" placeholder="Enter your password" size="xl"   :ui="{ base: 'px-6 py-4 text-xl rounded-xl' }" 
+          class="w-full mt-4 rounded-2xl" />
       </UFormField>
 
-      <UButton type="submit" block :loading="loading">
+      <UButton type="submit" block :loading="loading" size="xl"
+        class="mt-6 py-2 text-2xl font-bold rounded-2xl bg-orange-400 hover:bg-orange-600 transition-all">
         Sign In
       </UButton>
     </UForm>
-    <p>Pas encore de compte ? <NuxtLink to="/auth/register">Inscris-toi ici</NuxtLink>
+
+    <p class="text-center text-2xl text-black mt-6">
+      Don't have an account?
+      <NuxtLink to="/auth/register" class="text-orange-600 hover:underline text-2xl font-semibold">Sign Up today !
+      </NuxtLink>
     </p>
   </UCard>
 </template>
