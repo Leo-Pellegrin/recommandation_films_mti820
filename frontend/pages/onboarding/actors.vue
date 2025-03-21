@@ -18,6 +18,8 @@ async function submitSelection() {
   console.log('Acteurs sélectionnés :', selectedActors.value)
 
   try {
+    // TODO: Envoyer les acteurs sélectionnés à l'API
+
     // await fetch('http://localhost:8000/api/users/favorite-actors', {
     //   method: 'POST',
     //   headers: {
@@ -27,7 +29,7 @@ async function submitSelection() {
     //   body: JSON.stringify({ userId: userStore.user?.id, actors: selectedActors.value.map(a => a.id) })
     // })
 
-    router.push('/dashboard') // 🔹 Redirection vers l'étape suivante
+    router.push('/onboarding/directors') //
   } catch (error) {
     console.error('Erreur lors de l\'envoi des acteurs sélectionnés:', error)
   }
