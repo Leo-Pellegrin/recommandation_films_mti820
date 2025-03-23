@@ -2,10 +2,25 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
 from models import Movie
-from schemas import MovieCreate, MovieResponse
+from schemas import MovieCreate, MovieResponse, GenresResponse
 from typing import List
 
 router = APIRouter()
+
+
+@router.get("/genres", response_model=List[str])
+def get_genres(db: Session = Depends(get_db)):
+    genres = db.query(Movie.genres).distinct().all()
+
+    unique_genres = set()  # Utiliser un `set` pour éviter les doublons
+
+    for genre_list in genres:
+        if genre_list[0]:  
+            genre_items = eval(genre_list[0]) if isinstance(genre_list[0], str) else genre_list[0]
+            unique_genres.update(genre_items)  # Ajoute chaque genre unique
+
+    return sorted(unique_genres)  # Retourne une liste triée pour plus de lisibilité
+
 
 # 🔹 Ajouter un film
 @router.post("/", response_model=MovieResponse)

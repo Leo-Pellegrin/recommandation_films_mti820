@@ -54,3 +54,7 @@ class UserPreferencesCreate(BaseModel):
 
 class UserPreferencesResponse(UserPreferencesCreate):
     model_config = ConfigDict(from_attributes=True)
+
+class GenresResponse(BaseModel):
+    genre: str
+    model_config = ConfigDict(from_attributes=True)
