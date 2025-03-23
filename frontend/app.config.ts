@@ -63,7 +63,7 @@ export default defineAppConfig({
                     true: {
                         item: 'text-(--ui-text-highlighted) before:bg-(--ui-bg-elevated)',
                         itemLeadingIcon: 'text-(--ui-text)'
-                    },                    
+                    },
                 },
                 loading: {
                     true: {
@@ -71,6 +71,16 @@ export default defineAppConfig({
                     }
                 }
             }
-        }
+        },
+        navigationMenu: {
+            variants: {
+                color: {
+                    primary: {
+                        link: 'focus-visible:before:ring-orange-500',
+                        childLink: 'focus-visible:outline-orange-500'
+                    },
+                },
+            },
+        },
     }
 })

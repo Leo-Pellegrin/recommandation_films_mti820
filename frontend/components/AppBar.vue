@@ -20,7 +20,8 @@
       </UButton>
       <UButton icon="line-md-bell" size="xl" class="mx-2 text-white hover:scale-115 transition-all text-xl">
       </UButton>
-      <UButton icon="line-md-account" size="xl" class="mx-2 text-white hover:scale-115 transition-all text-3xl">
+      <UButton @click="navigateTo('/profile/preferences')" icon="line-md-account" size="xl" class="mx-2 text-white hover:scale-115 transition-all text-3xl">
+        
       </UButton>
     </nav>
   </header>
