@@ -4,6 +4,11 @@ const router = useRouter()
 function goToHome() {
   router.push('/')
 }
+// 🔹 Vérification de l'authentification (middleware)
+definePageMeta({
+  middleware: 'auth',
+  layout: 'auth'
+})
 </script>
 
 <template>

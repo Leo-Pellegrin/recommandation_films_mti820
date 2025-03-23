@@ -6,7 +6,7 @@ const { status, data: session } = useAuth()
 </script>
 
 <template>
-  <UApp>
+  <UApp :dark="true">
     <NuxtLayout>
       <template v-if="status === 'loading'">
         <div class="flex h-screen justify-center items-center">
@@ -20,3 +20,9 @@ const { status, data: session } = useAuth()
     </NuxtLayout>
   </UApp>
 </template>
+
+<style scoped>
+body {
+  background-color: #121212 !important;
+}
+</style>
