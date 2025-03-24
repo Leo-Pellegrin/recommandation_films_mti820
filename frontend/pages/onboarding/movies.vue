@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
 import { useMovies } from '~/composables/useMovies'
-import { useUserStore } from '~/store/userStore'
+// import { useUserStore } from '~/store/userStore'
 
 // Vérification de l'authentification (middleware)
 definePageMeta({
@@ -10,7 +9,6 @@ definePageMeta({
 })
 
 const router = useRouter()
-const userStore = useUserStore()
 const { selectedMovies, toggleMovie, displayedMovies, searchQuery } = useMovies()
 
 async function submitSelection() {
@@ -41,12 +39,12 @@ async function submitSelection() {
     <h1 class="flex justify-center mt-10 text-5xl font-extrabold text-left text-white mb-6">Select your favorite
       movie</h1>
 
-    <!-- 🔹 Barre de recherche -->
+    
     <UInput v-model="searchQuery" placeholder="Search movies..." :ui="{ base: 'text-lg p-4' }"
       class="w-2/3 text-2xl p-5 mt-10 mx-auto bg-gray-800 text-black rounded-2xl shadow-lg" size="xl" />
 
 
-    <!-- 🔹 Sélectionnés en haut -->
+    
     <div v-if="selectedMovies.length" class="grid grid-cols-6 gap-6 mt-8">
       <div v-for="movie in selectedMovies" :key="movie.id">
         <UButton @click="toggleMovie(movie)"
@@ -58,7 +56,7 @@ async function submitSelection() {
     </div>
 
 
-    <!-- 🔹 Grille des films -->
+    
     <div class="grid grid-cols-6 gap-10 mt-12">
       <div v-for="movie in displayedMovies.slice(0, 12)" :key="movie.id">
         <UButton @click="toggleMovie(movie)"

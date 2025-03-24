@@ -66,9 +66,8 @@ async function onSubmit(event: FormSubmitEvent<any>) {
       username: data.username,
     });
 
-    // Vérifier `first_login` et rediriger
-    if (data.first_login) {
 
+    if (data.first_login) {
       navigateTo('/onboarding/genres') // Redirection vers l'onboarding
     } else {
       window.location.reload() // Recharger la page actuelle

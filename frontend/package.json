@@ -10,7 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@nuxt/ui": "^3.0.0",
+    "@nuxt/ui": "^3.0.1",
     "@pinia/nuxt": "^0.10.1",
     "@sidebase/nuxt-auth": "^0.10.1",
     "@tailwindcss/vite": "^4.0.15",

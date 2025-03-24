@@ -29,7 +29,7 @@ async function submitSelection() {
     //   body: JSON.stringify({ userId: userStore.user?.id, actors: selectedActors.value.map(a => a.id) })
     // })
 
-    router.push('/onboarding/directors') //
+    router.push('/onboarding/movies') //
   } catch (error) {
     console.error('Erreur lors de l\'envoi des acteurs sélectionnés:', error)
   }
