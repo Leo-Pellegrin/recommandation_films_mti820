@@ -23,6 +23,15 @@ def get_user_ratings(user_id: int, db: Session = Depends(get_db)):
     ratings = db.query(Rating).filter(Rating.user_id == user_id).all()
     return [{"id": r.rating_id, "user_id": r.user_id, "movie_id": r.movie_id, "rating": r.rating} for r in ratings] 
 
+@router.post("/user/{user_id}")
+def add_user_rating(user_id: int, ratings: List[RatingCreate], db: Session = Depends(get_db)):
+    for rating in ratings:
+        new_rating = Rating(**rating.model_dump())
+        new_rating.user_id = user_id
+        db.add(new_rating)
+    db.commit()
+    return {"message": "Notations ajoutées avec succès"}
+
 # 🔹 Récupérer la moyenne d’un film
 @router.get("/movie/{movie_id}/average")
 def get_average_rating(movie_id: int, db: Session = Depends(get_db)):

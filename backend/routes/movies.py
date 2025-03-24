@@ -7,7 +7,6 @@ from typing import List
 
 router = APIRouter()
 
-
 @router.get("/genres", response_model=List[str])
 def get_genres(db: Session = Depends(get_db)):
     genres = db.query(Movie.genres).distinct().all()
