@@ -18,10 +18,14 @@
       <UButton @click="openSearchModal" icon="line-md-search" size="xl" color="none"
         class="mx-2 text-white  hover:scale-115 transition-all text-xl">
       </UButton>
-      <UButton icon="line-md-bell" size="xl" color="none" class="mx-2 text-white hover:scale-115 transition-all text-xl">
+      <UButton icon="line-md-bell" size="xl" color="none"
+        class="mx-2 text-white hover:scale-115 transition-all text-xl">
       </UButton>
-      <UButton @click="navigateTo('/profile/preferences')" color="none" icon="line-md-account" size="xl" class="mx-2 text-white hover:scale-115 transition-all text-3xl">
-        
+      <UButton @click="navigateTo('/profile/preferences')" color="none" icon="line-md-account" size="xl"
+        class="mx-2 text-white hover:scale-115 transition-all text-3xl">
+      </UButton>
+      <UButton @click="logOut()" color="none" icon="material-symbols-light-login-outline" size="xl"
+        class=" text-white hover:scale-115 transition-all text-3xl">
       </UButton>
     </nav>
   </header>
@@ -45,6 +49,13 @@ function openSearchModal() {
   const modal = overlay.create(SearchBar)
 
   modal.open()
+}
+
+function logOut() {
+  const token = useCookie('auth.token')
+  token.value = null
+
+  window.location.reload()
 }
 
 </script>

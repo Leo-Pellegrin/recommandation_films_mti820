@@ -72,9 +72,9 @@ async function onSubmit(event: FormSubmitEvent<any>) {
       console.log("Premier login")
       window.location.href = '/onboarding/genres'
     } 
-    // else {
-    //   window.location.reload() // Recharger la page actuelle
-    // }
+    else {
+      window.location.reload() // Recharger la page actuelle
+    }
 
   } catch (error: any) {
     console.error("Erreur de connexion :", error);
