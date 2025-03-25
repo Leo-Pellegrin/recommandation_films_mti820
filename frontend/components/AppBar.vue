@@ -15,12 +15,12 @@
 
     <!-- Icons (Alignés à droite) -->
     <nav class="flex items-center my-10 ml-auto mr-10">
-      <UButton @click="openSearchModal" icon="line-md-search" size="xl"
+      <UButton @click="openSearchModal" icon="line-md-search" size="xl" color="none"
         class="mx-2 text-white  hover:scale-115 transition-all text-xl">
       </UButton>
-      <UButton icon="line-md-bell" size="xl" class="mx-2 text-white hover:scale-115 transition-all text-xl">
+      <UButton icon="line-md-bell" size="xl" color="none" class="mx-2 text-white hover:scale-115 transition-all text-xl">
       </UButton>
-      <UButton @click="navigateTo('/profile/preferences')" icon="line-md-account" size="xl" class="mx-2 text-white hover:scale-115 transition-all text-3xl">
+      <UButton @click="navigateTo('/profile/preferences')" color="none" icon="line-md-account" size="xl" class="mx-2 text-white hover:scale-115 transition-all text-3xl">
         
       </UButton>
     </nav>

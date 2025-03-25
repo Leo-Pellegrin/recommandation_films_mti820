@@ -25,13 +25,13 @@ const items = computed(() => [
         label: 'Preferences',
         icon: 'i-lucide-heart',
         to: '/profile/preferences',
-        class: isActive('/profile/preferences') ? 'text-orange-500 font-bold text-xl' : 'text-white text-xl',        
+        class: isActive('/profile/preferences') ? 'text-orange-500 font-bold text-xl' : 'text-white text-xl',
       },
       {
         label: 'Membership',
         icon: 'i-lucide-credit-card',
         to: '/profile/preferences',
-        class: isActive('/profile/membership') ? 'text-orange-500 font-bold text-xl' : 'text-white text-xl',          
+        class: isActive('/profile/membership') ? 'text-orange-500 font-bold text-xl' : 'text-white text-xl',
       },
     ],
   },
@@ -44,7 +44,7 @@ const items = computed(() => [
         label: 'Historique',
         icon: 'i-lucide-history',
         to: '/profile/ratings',
-        class: isActive('/profile/ratings') ? 'text-orange-500 font-bold text-xl' : 'text-white text-xl'          
+        class: isActive('/profile/ratings') ? 'text-orange-500 font-bold text-xl' : 'text-white text-xl'
       },
     ],
   }
@@ -57,8 +57,8 @@ const items = computed(() => [
     <!-- Sidebar -->
     <aside class="w-70 p-6 border-r border-gray-800">
       <h2 class="text-3xl font-bold mb-6">Account settings</h2>
-      <UNavigationMenu    highlight 
-    highlight-color="primary" orientation="vertical" :items="items" class="data-[orientation=vertical]:w-55" />
+      <UNavigationMenu highlight color="primary" highlight-color="primary" orientation="vertical" :items="items"
+        class="data-[orientation=vertical]:w-55" />
     </aside>
 
     <!-- Main Content -->
@@ -67,3 +67,6 @@ const items = computed(() => [
     </main>
   </div>
 </template>
+
+<style scoped>
+</style>

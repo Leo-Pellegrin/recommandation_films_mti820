@@ -2,6 +2,8 @@
 import type { FormSubmitEvent, FormError } from '@nuxt/ui'
 import { useUserStore } from '~/store/userStore'
 
+const router = useRouter()
+
 const userStore = useUserStore()
 definePageMeta({
   middleware: 'guest',
@@ -55,8 +57,7 @@ async function onSubmit(event: FormSubmitEvent<any>) {
     if (!response.ok) {
       throw new Error(data.detail || "Login failed. Please try again.");
     }
-
-    // Stocker manuellement le token dans Nuxt Auth
+    
     const token = useCookie('auth.token')
     token.value = data.access_token
 
@@ -66,12 +67,14 @@ async function onSubmit(event: FormSubmitEvent<any>) {
       username: data.username,
     });
 
-
+    console.log("Login successful:", data);
     if (data.first_login) {
-      navigateTo('/onboarding/genres') // Redirection vers l'onboarding
-    } else {
-      window.location.reload() // Recharger la page actuelle
-    }
+      console.log("Premier login")
+      window.location.href = '/onboarding/genres'
+    } 
+    // else {
+    //   window.location.reload() // Recharger la page actuelle
+    // }
 
   } catch (error: any) {
     console.error("Erreur de connexion :", error);

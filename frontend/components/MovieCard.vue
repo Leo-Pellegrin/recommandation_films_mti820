@@ -15,4 +15,4 @@ const props = defineProps<{
   rating?: number
 }>()
 
-</script>å√å
+</script>

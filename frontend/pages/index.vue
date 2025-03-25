@@ -2,6 +2,12 @@
 import { useTopRatedMovies } from '~/composables/useTopRatedMovies'
 
 const { movieCategories } = useTopRatedMovies()
+
+definePageMeta({
+  middleware: 'auth',
+  layout: 'default'
+})
+
 </script>
 
 <template>

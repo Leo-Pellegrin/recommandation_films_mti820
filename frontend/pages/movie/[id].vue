@@ -1,5 +1,11 @@
 <script setup lang="ts">
 
+definePageMeta({
+  middleware: 'auth',
+  layout: 'default'
+})
+
+
 const route = useRoute()
 const hoverRating = ref(0)
 const userRating = ref(0)

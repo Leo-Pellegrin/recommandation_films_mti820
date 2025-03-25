@@ -68,3 +68,7 @@ const emit = defineEmits<{ close: [boolean] }>()
     </template>
   </UModal>
 </template>
+
+<style scoped>
+
+</style>

@@ -1,5 +1,8 @@
 export default defineAppConfig({
-    ui: {
+    ui: {        
+        colors:{
+            primary: '#FF6900',
+        },
         formField: {
             error: 'text-md font-bold text-red-500' // Classes Tailwind CSS personnalisées
         },
@@ -35,13 +38,13 @@ export default defineAppConfig({
         commandPalette: {
             slots: {
                 root: 'flex flex-col min-h-400 min-w-0 divide-y divide-(--ui-border)',
-                input: '[&>input]:h-16 text-3xl px-4',
+                input: '[&>input]:h-16 text-3xl px-4 text-white',
                 close: '',
                 content: 'relative overflow-hidden flex flex-col',
                 viewport: 'relative divide-y divide-(--ui-border) scroll-py-1 overflow-y-auto flex-1 focus:outline-none',
                 group: 'p-2 isolate',
                 empty: 'py-8 text-center text-lg text-(--ui-text-muted)',
-                label: 'px-4 py-2 text-base font-semibold text-(--ui-text-highlighted)',
+                label: 'px-4 py-2 text-base font-semibold text-gray',
                 item: 'group relative w-full flex items-center gap-4 px-4 py-3 text-lg select-none outline-none before:absolute before:z-[-1] before:inset-px before:rounded-[calc(var(--ui-radius)*1.5)] data-disabled:cursor-not-allowed data-disabled:opacity-75',
                 itemLeadingIcon: 'shrink-0 size-6',
                 itemLeadingAvatar: 'shrink-0',
@@ -54,7 +57,7 @@ export default defineAppConfig({
                 itemTrailingKbds: 'hidden lg:inline-flex items-center shrink-0 gap-1',
                 itemTrailingKbdsSize: 'lg',
                 itemLabel: 'truncate space-x-1 rtl:space-x-reverse text-(--ui-text-dimmed)',
-                itemLabelBase: 'text-(--ui-text-highlighted) [&>mark]:text-(--ui-bg) [&>mark]:bg-(--ui-primary)',
+                itemLabelBase: 'text-gray [&>mark]:text-(--ui-bg) [&>mark]:bg-(--ui-primary)',
                 itemLabelPrefix: 'text-(--ui-text)',
                 itemLabelSuffix: 'text-(--ui-text-dimmed) [&>mark]:text-(--ui-bg) [&>mark]:bg-(--ui-primary)'
             },
@@ -74,12 +77,12 @@ export default defineAppConfig({
         },
         navigationMenu: {
             variants: {
-                color: {
-                    primary: {
-                        link: 'focus-visible:before:ring-orange-500',
-                        childLink: 'focus-visible:outline-orange-500'
-                    },
-                },
+                // color: {
+                //     primary: {
+                //         link: 'focus-visible:before:ring-orange-500',
+                //         childLink: 'focus-visible:outline-orange-500'
+                //     },
+                // },              
             },
         },
     }
