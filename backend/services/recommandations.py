@@ -38,7 +38,6 @@ def get_collaborative_recommendations(user_id: int, db: Session, n: int = 5):
     movie_ids = db.query(Movie.movie_id).all()
     movie_ids = [m[0] for m in movie_ids]
 
-    # Récupère les films que l'utilisateur n'a pas notés
     rated_ids = df[df["userId"] == user_id]["movieId"].tolist()
     unrated_ids = list(set(movie_ids) - set(rated_ids))
 
