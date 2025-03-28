@@ -16,6 +16,7 @@ pnpm-error.log*
 # 📌 Ignorer les environnements et fichiers sensibles
 .env
 .env.*.local
+venv/
 
 # 📌 Ignorer les dépendances et builds du backend
 backend/node_modules/
