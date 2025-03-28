@@ -1,48 +1,42 @@
-// composables/useMovies.ts
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 
 interface Movie {
   id: number
   title: string
-  posterPath: string | undefined
+  posterPath?: string
 }
-
-const TMDB_API_URL = 'https://api.themoviedb.org/3'
-const TMDB_API_KEY = '166e544a3195c0c362b7c9294e90775d'
 
 export function useMovies() {
   const allMovies = ref<Movie[]>([])
   const selectedMovies = ref<Movie[]>([])
   const searchQuery = ref('')
 
-  async function fetchPopularMovies() {
+  async function fetchMovies(limit = 20) {
     try {
-      const uniqueMovies = new Map()
-
-      for (let page = 1; page <= 5; page++) {
-        const response = await fetch(`${TMDB_API_URL}/movie/popular?api_key=${TMDB_API_KEY}&language=en-US&page=${page}`)
-        const data = await response.json()
-
-        console.log("data", data)
-        if (data.results) {
-          for (const movie of data.results) {
-            if (!uniqueMovies.has(movie.id)) {
-              uniqueMovies.set(movie.id, {
-                id: movie.id,
-                title: movie.title,
-                posterPath: movie.poster_path
-                  ? `https://image.tmdb.org/t/p/w185${movie.poster_path}`
-                  : '/images/placeholder_movie.jpeg'
-              })
-            }
-          }
-        }
-      }
-
-      allMovies.value = Array.from(uniqueMovies.values())
-
+      const response = await fetch(`http://localhost:8000/api/movies/?limit=${limit}`)
+      const data = await response.json()      
+      console.log(data)
+      allMovies.value = data.map((movie: any) => ({
+        id: movie.movie_id,
+        title: movie.title,
+        posterPath: movie.poster_path ?? '/images/placeholder_movie.jpeg'
+      }))
     } catch (error) {
-      console.error('Erreur lors de la récupération des films:', error)
+      console.error('Erreur lors de la récupération des films :', error)
+    }
+  }
+
+  async function searchMovies(query: string) {
+    try {
+      const response = await fetch(`http://localhost:8000/api/movies/search/${encodeURIComponent(query)}`)
+      const data = await response.json()
+      allMovies.value = data.map((movie: any) => ({
+        id: movie.movie_id,
+        title: movie.title,
+        posterPath: movie.poster_path ?? '/images/placeholder_movie.jpeg'
+      }))
+    } catch (error) {
+      console.error('Erreur lors de la recherche de films :', error)
     }
   }
 
@@ -58,53 +52,26 @@ export function useMovies() {
   const displayedMovies = computed(() => {
     const filtered = allMovies.value.filter(
       (movie) => !selectedMovies.value.some(selected => selected.id === movie.id)
-    ).slice(0, 12)
-
-
-    const searched = searchQuery.value
-      ? filtered.filter((movie) => movie.title.toLowerCase().includes(searchQuery.value.toLowerCase()))
-      : filtered
-
-    return searched.slice(0, 12)
+    )
+    return filtered.slice(0, 12)
   })
-
 
   watch(searchQuery, async (query) => {
     if (!query) {
-      fetchPopularMovies()
-      return
-    }
-
-    try {
-      const response = await fetch(`${TMDB_API_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=en-US&page=1`)
-      const data = await response.json()
-
-      if (data.results) {
-        allMovies.value = data.results
-          .map((movie: any) => ({
-            id: movie.id,
-            title: movie.title,
-            posterPath: movie.poster_path
-              ? `https://image.tmdb.org/t/p/w185${movie.poster_path}`
-              : '/images/placeholder_movie.jpeg'
-          }))
-      }
-    } catch (error) {
-      console.error('Erreur de recherche TMDB :', error)
+      fetchMovies()
+    } else {
+      await searchMovies(query)
     }
   })
 
-  onMounted(fetchPopularMovies)
+  onMounted(() => fetchMovies())
 
   return {
     allMovies,
     selectedMovies,
     toggleMovie,
     displayedMovies,
-    fetchPopularMovies,
+    fetchMovies,
     searchQuery
   }
-
 }
-
-

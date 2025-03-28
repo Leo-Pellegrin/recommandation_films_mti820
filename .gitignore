@@ -22,6 +22,10 @@ venv/
 backend/node_modules/
 backend/.venv/
 backend/__pycache__/
+backend/routes/__pycache__/
+backend/services/__pycache__/
+backend/tests/__pycache__/
+backend/utils/__pycache__/
 backend/db.sqlite3
 backend/.mypy_cache/
 backend/.pytest_cache/

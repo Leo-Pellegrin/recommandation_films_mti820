@@ -1,20 +1,19 @@
 from pydantic import BaseModel, ConfigDict
-from typing import List
+from typing import Optional, List
+
 
 class MovieBase(BaseModel):
     title: str
     year: int
-    genres: List[str]  # Tableau JSON
-
+    genres: List[str]  
+    poster_path: Optional[str] = None
 
 class MovieCreate(MovieBase):
     pass  # Aucun champ supplémentaire
 
 class MovieResponse(MovieBase):
     movie_id: int
-
     model_config = ConfigDict(from_attributes=True)
-
         
 class UserCreate(BaseModel):
     username: str
@@ -34,10 +33,8 @@ class RatingCreate(BaseModel):
     rating: float
 
 class RatingResponse(RatingCreate):
-    id: int
-    
+    id: int    
     model_config = ConfigDict(from_attributes=True)
-
 
 class LinkCreate(BaseModel):
     movie_id: int

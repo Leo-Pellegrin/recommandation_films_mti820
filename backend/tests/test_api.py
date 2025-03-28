@@ -1,6 +1,7 @@
 import sys
 import os
 import random
+import pytest
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -109,15 +110,67 @@ def test_get_link():
     assert response.status_code == 200
     assert "imdb_id" in response.json()
     
-# def test_update_preferences():
-#     response = client.post("/api/preferences", json={
-#         "user_id": 1,
-#         "favorite_genres": ["Action", "Sci-Fi"]
-#     })
-#     assert response.status_code == 200
-#     assert "favorite_genres" in response.json()
+@pytest.fixture
+def test_user_id():
+    return 1
 
-# def test_get_preferences():
-#     response = client.get("/api/preferences/1")
-#     assert response.status_code == 200
-#     assert isinstance(response.json()["favorite_genres"], list)
+@pytest.fixture
+def test_movie_ids():
+    return [101, 102, 103]    
+ 
+# -------------------------
+# 📌 TESTS GENRES
+# -------------------------
+
+def test_set_genres(test_user_id):
+    res = client.post(f"/users/{test_user_id}/preferences/genres", json={"genres": ["Action", "Thriller"]})
+    assert res.status_code == 200
+    assert "updated" in res.json()["message"]
+
+def test_get_genres(test_user_id):
+    res = client.get(f"/users/{test_user_id}/preferences/genres")
+    assert res.status_code == 200
+    assert "preferred_genres" in res.json()
+
+def test_delete_one_genre(test_user_id):
+    res = client.delete(f"/users/{test_user_id}/preferences/genres/Thriller")
+    assert res.status_code == 200
+    assert "removed" in res.json()["message"]
+
+# -------------------------
+# 📌 TESTS ACTORS
+# -------------------------
+
+def test_set_actors(test_user_id):
+    res = client.post(f"/users/{test_user_id}/preferences/actors", json={"actors": ["Ryan Gosling", "Scarlett Johansson"]})
+    assert res.status_code == 200
+
+def test_get_actors(test_user_id):
+    res = client.get(f"/users/{test_user_id}/preferences/actors")
+    assert res.status_code == 200
+    assert "preferred_actors" in res.json()
+
+def test_delete_one_actor(test_user_id):
+    res = client.delete(f"/users/{test_user_id}/preferences/actors/Ryan Gosling")
+    assert res.status_code == 200
+
+# -------------------------
+# 📌 TESTS FILMS FAVORIS
+# -------------------------
+
+def test_add_favorite_movies_batch(test_user_id, test_movie_ids):
+    res = client.post(f"/users/{test_user_id}/favorites/movies/batch", json={"movie_ids": test_movie_ids})
+    assert res.status_code == 200
+
+def test_get_favorite_movies(test_user_id):
+    res = client.get(f"/users/{test_user_id}/favorites/movies")
+    assert res.status_code == 200
+    assert isinstance(res.json(), list)
+
+def test_delete_one_favorite_movie(test_user_id):
+    res = client.delete(f"/users/{test_user_id}/favorites/movies/101")
+    assert res.status_code == 200
+
+def test_delete_multiple_favorite_movies(test_user_id):
+    res = client.delete(f"/users/{test_user_id}/favorites/movies/batch", json={"movie_ids": [102, 103]})
+    assert res.status_code == 200

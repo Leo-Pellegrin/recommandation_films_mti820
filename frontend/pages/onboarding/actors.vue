@@ -13,23 +13,32 @@ definePageMeta({
   layout: 'auth'
 })
 
+function nextOnboarding() {
+  router.push('/onboarding/movies')
+}
+
 // 🔹 Envoi des acteurs sélectionnés au backend et redirection
 async function submitSelection() {
   console.log('Acteurs sélectionnés :', selectedActors.value)
 
   try {
-    // TODO: Envoyer les acteurs sélectionnés à l'API
+    const urlPreferencesActors = "http://localhost:8000/api/preferences/" + userStore.user?.id + "/actors"
 
-    // await fetch('http://localhost:8000/api/users/favorite-actors', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     Authorization: `Bearer ${userStore.token}`
-    //   },
-    //   body: JSON.stringify({ userId: userStore.user?.id, actors: selectedActors.value.map(a => a.id) })
-    // })
 
-    router.push('/onboarding/movies') //
+    const response = await fetch(urlPreferencesActors, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',        
+      },
+      body: JSON.stringify({actors: selectedActors.value.map(a => a.name) })
+    })
+
+    if (response.ok) {
+      nextOnboarding()
+    } else {
+      console.error(`Erreur : serveur a répondu avec le statut ${response.status}`)
+    }
+    
   } catch (error) {
     console.error('Erreur lors de l\'envoi des acteurs sélectionnés:', error)
   }

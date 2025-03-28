@@ -2,16 +2,8 @@ from sqlalchemy import Column, Integer, String, ForeignKey, ARRAY, DateTime, Flo
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import TEXT
 from database import Base
+from datetime import datetime  
 
-# class UserPreferences(Base):
-#     __tablename__ = "user_preferences"
-
-#     id = Column(Integer, primary_key=True, index=True)
-#     user_id = Column(Integer, ForeignKey("users.id"), unique=True)
-#     favorite_genres = Column(String, nullable=True)  # Ex: "Action, Drame, Science-Fiction"
-#     favorite_actors = Column(String, nullable=True)  # Ex: "Leonardo DiCaprio, Brad Pitt"
-
-#     user = relationship("User", back_populates="preferences")
     
 class User(Base):
     __tablename__ = "users"
@@ -22,7 +14,8 @@ class User(Base):
     password_hash = Column(String, nullable=True)
     first_login = Column(Boolean, nullable=True)
 
-    # preferences = relationship("UserPreferences", back_populates="user", uselist=False)
+    favorite_movies = relationship("UserMoviePreference", back_populates="user", cascade="all, delete")
+    preferences = relationship("Preference", back_populates="user", uselist=False)
 
 class UserFeature(Base):
     __tablename__ = "user_features"
@@ -39,6 +32,10 @@ class Movie(Base):
     title = Column(String, index=True)
     year = Column(Integer, index=True)
     genres = Column(ARRAY(TEXT), index=True)
+    poster_path = Column(String) 
+
+    
+    link = relationship("Link", back_populates="movie", uselist=False)
     
 class MovieFeature(Base):
     __tablename__ = "movie_features"
@@ -64,6 +61,9 @@ class Link(Base):
     imdb_id = Column(Integer, index=True)
     tmdb_id = Column(Integer, index=True)
     
+    movie = relationship("Movie", back_populates="link")
+
+    
 class Tag(Base):
     __tablename__ = "tags"
 
@@ -81,5 +81,26 @@ class Recommendation(Base):
     movie_id = Column(Integer, ForeignKey("movies.movie_id"))
     score = Column(Integer, index=True)
     
+class UserMoviePreference(Base):
+    __tablename__ = "user_movie_preferences"
 
+    user_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), primary_key=True)
+    movie_id = Column(Integer, ForeignKey("movies.movie_id", ondelete="CASCADE"), primary_key=True)
+    rating = Column(Integer, index=True)
+
+    user = relationship("User", back_populates="favorite_movies")
+    movie = relationship("Movie")
+
+class Preference(Base):
+    __tablename__ = "preferences"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), unique=True, nullable=False)
+
+    preferred_genres = Column(ARRAY(String), default=[])
+    preferred_actors = Column(ARRAY(String), default=[])
+
+    created_at = Column(DateTime, default=datetime.now)
+
+    user = relationship("User", back_populates="preferences")
     

@@ -7,14 +7,14 @@ const userStore = useUserStore()
 const user = ref({ id: 0, email: '', username: '' })
 const router = useRouter()
 
-function finishOnboarding() {
+function nextOnboarding() {
   router.push('/onboarding/actors')
 }
 
 onMounted(async () => {
   await userStore.checkAuth()
   console.log('UserStore:', userStore.user)
-  if (userStore.isAuthenticated) { // ✅ Vérifie si l'utilisateur est connecté
+  if (userStore.isAuthenticated) {
     user.value = {
       id: userStore.user?.id ?? 0,
       email: userStore.user?.email ?? '',
@@ -34,11 +34,31 @@ definePageMeta({
 const { genres, selectedGenres, toggleGenre } = useGenres()
 
 // Bouton de validation
-function submitSelection() {
+async function submitSelection() {
   console.log('Genres sélectionnés :', selectedGenres.value)
-  // Envoyer a l'api les genres sélectionnés
 
-  finishOnboarding()
+  try {
+    const urlPreferencesGenre = "http://localhost:8000/api/preferences/" + userStore.user?.id + "/genres"
+
+    const response = await fetch(urlPreferencesGenre, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+        genres: selectedGenres.value.map(a => a)  
+      })
+    })
+
+    if (response.ok) {
+      nextOnboarding()
+    } else {
+      console.error(`Erreur : serveur a répondu avec le statut ${response.status}`)
+    }
+
+  } catch (error) {
+    console.error("Erreur lors de l'envoi des genres sélectionnés :", error)
+  }
 }
 
 </script>

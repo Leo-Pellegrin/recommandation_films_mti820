@@ -11,6 +11,10 @@ definePageMeta({
 const router = useRouter()
 const { selectedMovies, toggleMovie, displayedMovies, searchQuery } = useMovies()
 
+watch(displayedMovies, (displayedMovies) => {
+  console.log(displayedMovies)
+})
+
 async function submitSelection() {
   console.log('Films sélectionnés :', selectedMovies.value)
 

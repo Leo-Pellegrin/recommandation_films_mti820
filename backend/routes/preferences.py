@@ -5,18 +5,18 @@ from database import get_db
 from models import Preference, UserMoviePreference
 from schemas import GenreList, ActorList, MovieIDList
 
-router = APIRouter(prefix="/users", tags=["Preferences"])
+router = APIRouter(prefix="", tags=["Preferences"])
 
 # --- GENRES ---
 
-@router.get("/{user_id}/preferences/genres")
+@router.get("/{user_id}/genres")
 def get_user_genres(user_id: int, db: Session = Depends(get_db)):
     pref = db.query(Preference).filter_by(user_id=user_id).first()
     if not pref:
         raise HTTPException(status_code=404, detail="Preferences not found")
     return {"preferred_genres": pref.preferred_genres}
 
-@router.post("/{user_id}/preferences/genres")
+@router.post("/{user_id}/genres")
 def set_user_genres(user_id: int, data: GenreList, db: Session = Depends(get_db)):
     pref = db.query(Preference).filter_by(user_id=user_id).first()
     if not pref:
@@ -27,7 +27,7 @@ def set_user_genres(user_id: int, data: GenreList, db: Session = Depends(get_db)
     db.commit()
     return {"message": "Preferred genres updated"}
 
-@router.delete("/{user_id}/preferences/genres/{genre}")
+@router.delete("/{user_id}/genres/{genre}")
 def delete_user_genre(user_id: int, genre: str, db: Session = Depends(get_db)):
     pref = db.query(Preference).filter_by(user_id=user_id).first()
     if not pref:
@@ -46,14 +46,14 @@ def delete_user_genre(user_id: int, genre: str, db: Session = Depends(get_db)):
 
 # --- ACTORS ---
 
-@router.get("/{user_id}/preferences/actors")
+@router.get("/{user_id}/actors")
 def get_user_actors(user_id: int, db: Session = Depends(get_db)):
     pref = db.query(Preference).filter_by(user_id=user_id).first()
     if not pref:
         raise HTTPException(status_code=404, detail="Preferences not found")
     return {"preferred_actors": pref.preferred_actors}
 
-@router.post("/{user_id}/preferences/actors")
+@router.post("/{user_id}/actors")
 def set_user_actors(user_id: int, data: ActorList, db: Session = Depends(get_db)):
     pref = db.query(Preference).filter_by(user_id=user_id).first()
     if not pref:
@@ -64,7 +64,7 @@ def set_user_actors(user_id: int, data: ActorList, db: Session = Depends(get_db)
     db.commit()
     return {"message": "Preferred actors updated"}
 
-@router.delete("/{user_id}/preferences/actors/{actor}")
+@router.delete("/{user_id}/actors/{actor}")
 def delete_user_actor(user_id: int, actor: str, db: Session = Depends(get_db)):
     pref = db.query(Preference).filter_by(user_id=user_id).first()
     if not pref:
