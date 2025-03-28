@@ -9,7 +9,7 @@ from services.recommandations import (
     get_collaborative_recommendations_user_based,
     get_collaborative_recommendations_item_based,
     get_content_based_recommendations,
-    # get_hybrid_recommendations
+    get_hybrid_recommendations
 )
 
 router = APIRouter()
