@@ -1,75 +1,111 @@
-# from fastapi import APIRouter, Depends, HTTPException
-# from sqlalchemy.orm import Session
-# from database import get_db
-# from models import UserPreferences
-# from schemas import UserPreferencesCreate, UserPreferencesResponse
+from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.orm import Session
+from typing import List
+from database import get_db
+from models import Preference, UserMoviePreference
+from schemas import GenreList, ActorList, MovieIDList
 
-# router = APIRouter()
+router = APIRouter(prefix="/users", tags=["Preferences"])
 
-# # 🔹 Ajouter ou mettre à jour les préférences d'un utilisateur
-# @router.post("/movies/{user_id}", response_model=UserPreferencesResponse)
-# def add_movies_preferences(movie_prefenrences: UserPreferencesCreate, user_id: int, db: Session = Depends(get_db)):
-#     preferences = db.query(UserPreferences).filter(UserPreferences.user_id == user_id).first()
-#     if not preferences:
-#         preferences = UserPreferences(user_id=user_id, **movie_prefenrences.dict())
-#         db.add(preferences)
-#     else:
-#         for key, value in movie_prefenrences.dict().items():
-#             setattr(preferences, key, value)
-#     db.commit()
-#     db.refresh(preferences)
-#     return preferences
-    
-# @router.post("/genres/{user_id}", response_model=UserPreferencesResponse)
-# def add_genres_preferences(genre_prefenrences: UserPreferencesCreate, user_id: int, db: Session = Depends(get_db)):
-#     preferences = db.query(UserPreferences).filter(UserPreferences.user_id == user_id).first()
-#     if not preferences:
-#         preferences = UserPreferences(user_id=user_id, **genre_prefenrences.dict())
-#         db.add(preferences)
-#     else:
-#         for key, value in genre_prefenrences.dict().items():
-#             setattr(preferences, key, value)
-#     db.commit()
-#     db.refresh(preferences)
-#     return preferences
+# --- GENRES ---
 
-# @router.post("/actors/{user_id}", response_model=UserPreferencesResponse)
-# def add_actors_preferences(actors_prefenrences: UserPreferencesCreate, user_id: int, db: Session = Depends(get_db)):
-#     preferences = db.query(UserPreferences).filter(UserPreferences.user_id == user_id).first()
-#     if not preferences:
-#         preferences = UserPreferences(user_id=user_id, **actors_prefenrences.dict())
-#         db.add(preferences)
-#     else:
-#         for key, value in actors_prefenrences.dict().items():
-#             setattr(preferences, key, value)
-#     db.commit()
-#     db.refresh(preferences)
-#     return preferences
-    
-# @router.get("/{user_id}", response_model=UserPreferencesResponse)
-# def get_preferences(user_id: int, db: Session = Depends(get_db)):
-#     preferences = db.query(UserPreferences).filter(UserPreferences.user_id == user_id).first()
-#     if not preferences:
-#         raise HTTPException(status_code=404, detail="Préférences non trouvées")
-#     return preferences
+@router.get("/{user_id}/preferences/genres")
+def get_user_genres(user_id: int, db: Session = Depends(get_db)):
+    pref = db.query(Preference).filter_by(user_id=user_id).first()
+    if not pref:
+        raise HTTPException(status_code=404, detail="Preferences not found")
+    return {"preferred_genres": pref.preferred_genres}
 
-# @router.get("/movies/{user_id}", response_model=UserPreferencesResponse)
-# def get_movies_preferences(user_id: int, db: Session = Depends(get_db)):
-#     preferences = db.query(UserPreferences).filter(UserPreferences.user_id == user_id).first()
-#     if not preferences:
-#         raise HTTPException(status_code=404, detail="Préférences non trouvées")
-#     return preferences
+@router.post("/{user_id}/preferences/genres")
+def set_user_genres(user_id: int, data: GenreList, db: Session = Depends(get_db)):
+    pref = db.query(Preference).filter_by(user_id=user_id).first()
+    if not pref:
+        pref = Preference(user_id=user_id, preferred_genres=data.genres)
+        db.add(pref)
+    else:
+        pref.preferred_genres = data.genres
+    db.commit()
+    return {"message": "Preferred genres updated"}
 
-# @router.get("/genres/{user_id}", response_model=UserPreferencesResponse)
-# def get_genres_preferences(user_id: int, db: Session = Depends(get_db)):
-#     preferences = db.query(UserPreferences).filter(UserPreferences.user_id == user_id).first()
-#     if not preferences:
-#         raise HTTPException(status_code=404, detail="Préférences non trouvées")
-#     return preferences
+@router.delete("/{user_id}/preferences/genres/{genre}")
+def delete_user_genre(user_id: int, genre: str, db: Session = Depends(get_db)):
+    pref = db.query(Preference).filter_by(user_id=user_id).first()
+    if not pref:
+        raise HTTPException(status_code=404, detail="Preferences not found")
 
-# @router.get("/actors/{user_id}", response_model=UserPreferencesResponse)
-# def get_actors_preferences(user_id: int, db: Session = Depends(get_db)):
-#     preferences = db.query(UserPreferences).filter(UserPreferences.user_id == user_id).first()
-#     if not preferences:
-#         raise HTTPException(status_code=404, detail="Préférences non trouvées")
-#     return preferences
+    # Normalisation pour comparaison insensible à la casse
+    normalized_genre = genre.strip().lower()
+    updated_genres = [g for g in pref.preferred_genres if g.strip().lower() != normalized_genre]
+
+    if len(updated_genres) == len(pref.preferred_genres):
+        raise HTTPException(status_code=404, detail="Genre not found in preferences")
+
+    pref.preferred_genres = updated_genres
+    db.commit()
+    return {"message": f"Genre '{genre}' removed from preferences"}
+
+# --- ACTORS ---
+
+@router.get("/{user_id}/preferences/actors")
+def get_user_actors(user_id: int, db: Session = Depends(get_db)):
+    pref = db.query(Preference).filter_by(user_id=user_id).first()
+    if not pref:
+        raise HTTPException(status_code=404, detail="Preferences not found")
+    return {"preferred_actors": pref.preferred_actors}
+
+@router.post("/{user_id}/preferences/actors")
+def set_user_actors(user_id: int, data: ActorList, db: Session = Depends(get_db)):
+    pref = db.query(Preference).filter_by(user_id=user_id).first()
+    if not pref:
+        pref = Preference(user_id=user_id, preferred_actors=data.actors)
+        db.add(pref)
+    else:
+        pref.preferred_actors = data.actors
+    db.commit()
+    return {"message": "Preferred actors updated"}
+
+@router.delete("/{user_id}/preferences/actors/{actor}")
+def delete_user_actor(user_id: int, actor: str, db: Session = Depends(get_db)):
+    pref = db.query(Preference).filter_by(user_id=user_id).first()
+    if not pref:
+        raise HTTPException(status_code=404, detail="Preferences not found")
+
+    normalized_actor = actor.strip().lower()
+    updated_actors = [a for a in pref.preferred_actors if a.strip().lower() != normalized_actor]
+
+    if len(updated_actors) == len(pref.preferred_actors):
+        raise HTTPException(status_code=404, detail="Actor not found in preferences")
+
+    pref.preferred_actors = updated_actors
+    db.commit()
+    return {"message": f"Actor '{actor}' removed from preferences"}
+# --- AJOUT MULTIPLE DE FILMS FAVORIS ---
+
+@router.post("/{user_id}/favorites/movies/batch")
+def add_multiple_favorite_movies(user_id: int, data: MovieIDList, db: Session = Depends(get_db)):
+    for movie_id in data.movie_ids:
+        exists = db.query(UserMoviePreference).filter_by(user_id=user_id, movie_id=movie_id).first()
+        if not exists:
+            db.add(UserMoviePreference(user_id=user_id, movie_id=movie_id))
+    db.commit()
+    return {"message": f"{len(data.movie_ids)} movies added to favorites"}
+
+@router.delete("/{user_id}/favorites/movies/{movie_id}")
+def remove_favorite_movie(user_id: int, movie_id: int, db: Session = Depends(get_db)):
+    rel = db.query(UserMoviePreference).filter_by(user_id=user_id, movie_id=movie_id).first()
+    if not rel:
+        raise HTTPException(status_code=404, detail="Movie not found in favorites")
+    db.delete(rel)
+    db.commit()
+    return {"message": "Movie removed from favorites"}
+
+@router.delete("/{user_id}/favorites/movies/batch")
+def remove_multiple_favorite_movies(user_id: int, data: MovieIDList, db: Session = Depends(get_db)):
+    deleted = 0
+    for movie_id in data.movie_ids:
+        rel = db.query(UserMoviePreference).filter_by(user_id=user_id, movie_id=movie_id).first()
+        if rel:
+            db.delete(rel)
+            deleted += 1
+    db.commit()
+    return {"message": f"{deleted} movies removed from favorites"}

@@ -58,3 +58,12 @@ class UserPreferencesResponse(UserPreferencesCreate):
 class GenresResponse(BaseModel):
     genre: str
     model_config = ConfigDict(from_attributes=True)
+    
+class GenreList(BaseModel):
+    genres: List[str]
+
+class ActorList(BaseModel):
+    actors: List[str]
+
+class MovieIDList(BaseModel):
+    movie_ids: List[int]
