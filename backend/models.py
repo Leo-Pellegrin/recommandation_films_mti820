@@ -3,7 +3,6 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import TEXT
 from database import Base
 from datetime import datetime  
-
     
 class User(Base):
     __tablename__ = "users"
@@ -86,7 +85,6 @@ class UserMoviePreference(Base):
 
     user_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), primary_key=True)
     movie_id = Column(Integer, ForeignKey("movies.movie_id", ondelete="CASCADE"), primary_key=True)
-    rating = Column(Integer, index=True)
 
     user = relationship("User", back_populates="favorite_movies")
     movie = relationship("Movie")

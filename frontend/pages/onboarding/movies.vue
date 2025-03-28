@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useMovies } from '~/composables/useMovies'
-// import { useUserStore } from '~/store/userStore'
+import { useUserStore } from '~/store/userStore'
 
 // Vérification de l'authentification (middleware)
 definePageMeta({
@@ -9,28 +9,33 @@ definePageMeta({
 })
 
 const router = useRouter()
+const userStore = useUserStore()
 const { selectedMovies, toggleMovie, displayedMovies, searchQuery } = useMovies()
 
-watch(displayedMovies, (displayedMovies) => {
-  console.log(displayedMovies)
-})
+function nextOnboarding(){
+  router.push("/onboarding/moviesratings")
+}
+
 
 async function submitSelection() {
   console.log('Films sélectionnés :', selectedMovies.value)
 
   try {
-    // TODO: Envoyer les films sélectionnés à l'API
+    const urlPreferencesMovies = "http://localhost:8000/api/preferences/" + userStore.user?.id + "/favorites/movies/batch"
+    const response = await fetch(urlPreferencesMovies, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',        
+      },
+      body: JSON.stringify({movie_ids: selectedMovies.value.map(movie => movie.id)})
+    })
 
-    // await fetch('http://localhost:8000/api/users/favorite-movies', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     Authorization: `Bearer ${userStore.token}`
-    //   },
-    //   body: JSON.stringify({ userId: userStore.user?.id, movies: selectedMovies.value.map(a => a.id) })
-    // })
-
-    router.push('/onboarding/finish') //
+    if (response.ok) {
+      nextOnboarding()
+    } else {
+      console.error(`Erreur : serveur a répondu avec le statut ${response.status}`)
+    }
+    
   } catch (error) {
     console.error('Erreur lors de l\'envoi des films sélectionnés:', error)
   }

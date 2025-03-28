@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List
 from database import get_db
 from models import Preference, UserMoviePreference
-from schemas import GenreList, ActorList, MovieIDList
+from schemas import GenreList, ActorList, MovieIDList, MovieResponse
 
 router = APIRouter(prefix="", tags=["Preferences"])
 
@@ -80,6 +80,29 @@ def delete_user_actor(user_id: int, actor: str, db: Session = Depends(get_db)):
     db.commit()
     return {"message": f"Actor '{actor}' removed from preferences"}
 # --- AJOUT MULTIPLE DE FILMS FAVORIS ---
+
+@router.get("/{user_id}/favorites/movies", response_model=List[MovieResponse])
+def get_favorite_movies(user_id: int, db: Session = Depends(get_db)):
+    favorites = (
+        db.query(UserMoviePreference)
+        .options(joinedload(UserMoviePreference.movie))  # charge les infos du film
+        .filter(UserMoviePreference.user_id == user_id)
+        .all()
+    )
+
+    if not favorites:
+        raise HTTPException(status_code=404, detail="No favorite movies found")
+
+    return [
+        {
+            "movie_id": fav.movie.movie_id,
+            "title": fav.movie.title,
+            "poster_path": fav.movie.poster_path or "/images/placeholder_movie.jpeg",
+            "year": fav.movie.year,
+            "genres": fav.movie.genres or []
+        }
+        for fav in favorites
+    ]
 
 @router.post("/{user_id}/favorites/movies/batch")
 def add_multiple_favorite_movies(user_id: int, data: MovieIDList, db: Session = Depends(get_db)):

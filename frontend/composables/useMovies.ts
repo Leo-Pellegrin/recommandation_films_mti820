@@ -15,7 +15,7 @@ export function useMovies() {
     try {
       const response = await fetch(`http://localhost:8000/api/movies/?limit=${limit}`)
       const data = await response.json()      
-      console.log(data)
+      
       allMovies.value = data.map((movie: any) => ({
         id: movie.movie_id,
         title: movie.title,

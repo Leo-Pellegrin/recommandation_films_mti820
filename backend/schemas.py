@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
-
+from datetime import datetime
 
 class MovieBase(BaseModel):
     title: str
@@ -28,9 +28,9 @@ class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class RatingCreate(BaseModel):
-    user_id: int
     movie_id: int
-    rating: float
+    rating: int
+    timestamp: Optional[datetime] = None
 
 class RatingResponse(RatingCreate):
     id: int    
