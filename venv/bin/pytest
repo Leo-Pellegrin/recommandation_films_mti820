@@ -1,4 +1,4 @@
-#!/home/ets/Documents/mti820/recommandation_films_mti820/venv/bin/python3
+#!/home/ets/Documents/mti820/recommandation_films_mti820_sauvegarde/venv/bin/python3.12
 # -*- coding: utf-8 -*-
 import re
 import sys

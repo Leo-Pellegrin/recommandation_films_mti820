@@ -33,7 +33,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV /home/ets/Documents/mti820/recommandation_films_mti820/venv
+set -gx VIRTUAL_ENV /home/ets/Documents/mti820/recommandation_films_mti820_sauvegarde/venv
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/"bin $PATH
