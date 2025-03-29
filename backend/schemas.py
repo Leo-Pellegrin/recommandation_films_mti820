@@ -64,3 +64,19 @@ class ActorList(BaseModel):
 
 class MovieIDList(BaseModel):
     movie_ids: List[int]
+    
+class SimilarMovie(BaseModel):
+    id: int
+    title: str
+    backdrop_path: Optional[str] = None
+
+class MovieDetailsResponse(BaseModel):
+    movie_id: int
+    title: str
+    genres: List[str]
+    rating: Optional[int] = None
+    backdrop_path: Optional[str] = None
+    runtime: Optional[int] = None
+    summary: Optional[str] = None
+    cast: List[str] = []
+    similar: List[SimilarMovie] = []

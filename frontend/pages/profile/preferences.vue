@@ -1,77 +1,111 @@
 <script setup lang="ts">
+import { useUserStore } from '~/store/userStore'
+import { ref, onMounted } from 'vue'
+
 definePageMeta({
   middleware: 'auth',
   layout: 'profile'
 })
 
-const genreOptions = ['Action', 'Comedy', 'Drama', 'Romance', 'Anime', 'Sci-Fi']
-const movieOptions = ['D1', 'D2', 'D3', 'D4']
-const actorOptions = ['A1', 'A2', 'A3', 'A4']
+const userStore = useUserStore()
+const selectedGenres = ref<string[]>([])
+const selectedActors = ref<string[]>([])
+const selectedMovies = ref<{ movie_id: number; title: string }[]>([])
 
-const selectedGenres = ref(['Action', 'Anime', 'Romance'])
-const selectedMovies = ref(['D1', 'D2', 'D3'])
-const selectedActors = ref(['A1', 'A2', 'A3'])
+async function fetchPreferences() {
+  const userId = userStore.user?.id
+  if (!userId) return
 
-const removeGenre = (index: number) => selectedGenres.value.splice(index, 1)
-const removeMovie = (index: number) => selectedMovies.value.splice(index, 1)
-const removeActor = (index: number) => selectedActors.value.splice(index, 1)
+  const [genresRes, actorsRes, moviesRes] = await Promise.all([
+    fetch(`http://localhost:8000/api/preferences/${userId}/genres`),
+    fetch(`http://localhost:8000/api/preferences/${userId}/actors`),
+    fetch(`http://localhost:8000/api/preferences/${userId}/favorites/movies`)
+  ])
+
+  selectedGenres.value = (await genresRes.json()).preferred_genres || []
+  selectedActors.value = (await actorsRes.json()).preferred_actors || []
+  selectedMovies.value = await moviesRes.json()
+}
+
+const removeGenre = async (index: number) => {
+  const genre = selectedGenres.value[index]
+  selectedGenres.value.splice(index, 1)
+
+  await fetch(`http://localhost:8000/api/preferences/${userStore.user?.id}/genres/${genre}`, {
+    method: 'DELETE'
+  })
+}
+
+const removeActor = async (index: number) => {
+  const actor = selectedActors.value[index]
+  selectedActors.value.splice(index, 1)
+
+  await fetch(`http://localhost:8000/api/preferences/${userStore.user?.id}/actors/${actor}`, {
+    method: 'DELETE'
+  })
+}
+
+const removeMovie = async (index: number) => {
+  const movie = selectedMovies.value[index]
+  selectedMovies.value.splice(index, 1)
+
+  await fetch(`http://localhost:8000/api/preferences/${userStore.user?.id}/favorites/movies/${movie.movie_id}`, {
+    method: 'DELETE'
+  })
+}
+
+onMounted(fetchPreferences)
 </script>
-
 <template>
-  <div class="p-6 space-y-6 max-w-3xl">
+  <div class="p-6 space-y-10 max-w-3xl">
     <h2 class="text-4xl font-semibold">Your preferences</h2>
 
     <!-- Favorite genres -->
-    <div class="flex flex-col">
-      <label class="text-2xl font-medium">Your favorite genres</label>
-      <USelectMenu v-model="selectedGenres" :options="genreOptions" multiple placeholder="Select genres" class="mt-2">
-        <template #default>
-          <div class="flex flex-wrap gap-2 p-3 rounded-lg">
-            <UBadge v-for="(genre, index) in selectedGenres" :key="index"
-              class="bg-orange-400 text-lg text-white flex items-center gap-1 px-3 mx-2 py-1 rounded-full">
-              {{ genre }}
-              <UButton icon="i-heroicons-x-mark" variant="link" color="primary" size="xl"
-                @click.stop="removeGenre(index)" />
-            </UBadge>
-          </div>
-        </template>
-      </USelectMenu>
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <label class="text-2xl font-medium">Favorite genres</label>
+        <UButton icon="i-heroicons-pencil-square" class="text-black" size='xl' @click="$router.push('/edit-preferences/genres')">
+          Edit genres
+        </UButton>
+      </div>
+      <div class="flex flex-wrap gap-2 p-3 rounded-lg bg-zinc-800">
+        <UBadge v-for="(genre, index) in selectedGenres" :key="genre"
+          class="bg-orange-400  px-3 py-1 rounded-full text-lg">
+          {{ genre }}
+        </UBadge>
+      </div>
     </div>
 
     <!-- Favorite actors -->
-    <div class="flex flex-col">
-      <label class="text-2xl font-medium">Your favorite actors/actress</label>
-      <USelectMenu v-model="selectedActors" :options="actorOptions" multiple placeholder="Select actors" class="mt-2">
-        <template #default>
-          <div class="flex flex-wrap gap-2 p-3 rounded-lg">
-            <UBadge v-for="(actor, index) in selectedActors" :key="index"
-              class="bg-orange-400 text-lg text-white flex items-center gap-1 px-3 mx-2 py-1 rounded-full">
-              {{ actor }}
-              <UButton icon="i-heroicons-x-mark" variant="link" color="primary" size="xl"
-                @click.stop="removeActor(index)" />
-            </UBadge>
-          </div>
-        </template>
-      </USelectMenu>
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <label class="text-2xl font-medium">Favorite actors</label>
+        <UButton class="text-black" size='xl' icon="i-heroicons-pencil-square" @click="$router.push('/edit-preferences/actors')">
+          Edit actors
+        </UButton>
+      </div>
+      <div class="flex flex-wrap gap-2 p-3 rounded-lg bg-zinc-800">
+        <UBadge v-for="(actor, index) in selectedActors" :key="actor"
+          class="bg-orange-400 px-3 py-1 rounded-full text-lg">
+          {{ actor }}
+        </UBadge>
+      </div>
     </div>
 
-    <!-- Favorite movie -->
-    <div class="flex flex-col">
-      <label class="text-2xl font-medium">Your favorite director</label>
-      <USelectMenu v-model="selectedMovies" :options="movieOptions" multiple placeholder="Select directors"
-        class="mt-2">
-        <template #default>
-          <div class="flex flex-wrap gap-2 p-3 rounded-lg">
-            <UBadge v-for="(movie, index) in selectedMovies" :key="index"
-              class="bg-orange-400 text-lg text-white flex items-center gap-1 px-3 mx-2 py-1 rounded-full">
-              {{ movie }}
-              <UButton icon="i-heroicons-x-mark" variant="link" color="primary" size="xl"
-                @click.stop="removeMovie(index)" />
-            </UBadge>
-          </div>
-        </template>
-      </USelectMenu>
+    <!-- Favorite movies -->
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <label class="text-2xl font-medium">Favorite movies</label>
+        <UButton icon="i-heroicons-pencil-square" class="text-black" size='xl' @click="$router.push('/edit-preferences/movies')">
+          Edit movies
+        </UButton>
+      </div>
+      <div class="flex flex-wrap gap-2 p-3 rounded-lg bg-zinc-800">
+        <UBadge v-for="(movie, index) in selectedMovies" :key="movie.movie_id"
+          class="bg-orange-400  px-3 py-1 rounded-full text-lg">
+          {{ movie.title }}
+        </UBadge>
+      </div>
     </div>
-
   </div>
 </template>

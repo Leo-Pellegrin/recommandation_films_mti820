@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
 from database import get_db
 from models import Movie
-from schemas import MovieCreate, MovieResponse, GenresResponse
+from schemas import MovieCreate, MovieResponse, MovieDetailsResponse
 from typing import List
-from utils.tmdb import fetch_tmdb_details
-
+from utils.tmdb import fetch_tmdb_details, fetch_tmdb_full_details
+from models import Movie, Link, Rating
 
 router = APIRouter()
 
@@ -72,12 +72,39 @@ def get_movies(limit: int = Query(50, ge=1), db: Session = Depends(get_db)):
     return result
 
 # 🔹 Récupérer un film par ID
-@router.get("/{movie_id}", response_model=MovieResponse)
-def get_movie(movie_id: int, db: Session = Depends(get_db)):
+@router.get("/movie/{movie_id}", response_model=MovieDetailsResponse)
+def get_movie_details(movie_id: int, user_id: int, db: Session = Depends(get_db)):
+    # 1. Récupérer le film
     movie = db.query(Movie).filter(Movie.movie_id == movie_id).first()
     if not movie:
-        raise HTTPException(status_code=404, detail="Film non trouvé")
-    return movie
+        raise HTTPException(status_code=404, detail="Movie not found")
+
+    # 2. Récupérer le lien TMDB
+    link = db.query(Link).filter(Link.movie_id == movie_id).first()
+    tmdb_id = link.tmdb_id if link else None
+
+    # 3. Récupérer la note utilisateur s'il y en a une
+    rating = (
+        db.query(Rating)
+        .filter_by(user_id=user_id, movie_id=movie_id)
+        .first()
+    )
+    user_rating = rating.rating if rating else None
+
+    # 4. Appeler TMDB pour plus d'infos
+    tmdb_data = fetch_tmdb_full_details(tmdb_id) if tmdb_id else {}
+    
+    return {
+        "movie_id": movie.movie_id,
+        "title": movie.title,
+        "genres": movie.genres or [],
+        "rating": user_rating,
+        "backdrop_path": tmdb_data.get("backdrop_path"),
+        "runtime": tmdb_data.get("runtime"),
+        "summary": tmdb_data.get("summary"),
+        "cast": tmdb_data.get("cast", []),
+        "similar": tmdb_data.get("similar", [])
+    }
 
 @router.get("/{movie_id}/recommendations", response_model=List[MovieResponse])
 def get_recommendations(movie_id: int, db: Session = Depends(get_db)):

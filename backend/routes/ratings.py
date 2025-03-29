@@ -1,11 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from database import get_db
 from models import Rating
 from schemas import RatingCreate, RatingResponse
 from typing import List
 from sqlalchemy.sql import func
 from datetime import datetime
+from models import Rating, Movie, Link
+from utils.tmdb import fetch_poster_from_tmdb
+
 
 router = APIRouter()
 
@@ -18,11 +21,32 @@ def add_rating(rating: RatingCreate, db: Session = Depends(get_db)):
     db.refresh(new_rating)
     return {"id": new_rating.rating_id, "user_id": new_rating.user_id, "movie_id": new_rating.movie_id, "rating": new_rating.rating} 
 
-# 🔹 Récupérer les notations d'un utilisateur
-@router.get("/user/{user_id}", response_model=List[RatingResponse])
+# Récupérer tout les ratings de l'utilisateur
+@router.get("/user/{user_id}")
 def get_user_ratings(user_id: int, db: Session = Depends(get_db)):
-    ratings = db.query(Rating).filter(Rating.user_id == user_id).all()
-    return [{"id": r.rating_id, "user_id": r.user_id, "movie_id": r.movie_id, "rating": r.rating} for r in ratings] 
+    ratings = (
+        db.query(Rating)
+        .join(Movie)
+        .outerjoin(Link, Movie.movie_id == Link.movie_id)
+        .options(joinedload(Rating.movie))
+        .filter(Rating.user_id == user_id)
+        .all()
+    )
+
+    result = []
+    for r in ratings:
+        poster_path = r.movie.poster_path
+        if not poster_path and r.movie.link:
+            poster_path = fetch_poster_from_tmdb(r.movie.link.tmdb_id)
+
+        result.append({
+            "movie_id": r.movie.movie_id,
+            "title": r.movie.title,
+            "rating": r.rating,
+            "poster_path": poster_path or "/images/placeholder_movie.jpeg"
+        })
+
+    return result
 
 # Ajouter plusieurs ratings
 @router.post("/user/{user_id}/ratings")

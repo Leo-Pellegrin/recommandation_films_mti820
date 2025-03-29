@@ -36,14 +36,18 @@ function setRating(movieId: number, value: number) {
   }
 }
 
-const gridColsClass = computed(() => {
-  const count = favoriteMovies.value.length
-  const cols = Math.min(count, 5)
-  return `grid-cols-${cols > 0 ? cols : 1}`
-})
+const gridCols = ref('')
+
 
 onMounted(async () => {
   favoriteMovies.value = await getFavoritesMovies()
+  const count = favoriteMovies.value.length
+
+  const cols = Math.min(count, 5)
+  console.log(cols)
+
+  gridCols.value = `grid-cols-${cols > 0 ? cols : 1}`
+  console.log(gridCols.value)
 })
 
 async function getFavoritesMovies() {
@@ -94,7 +98,7 @@ function finishOnboarding(){
   <div class="min-h-screen bg-black text-white p-10">
     <h1 class="text-4xl font-bold text-center mb-6 mt-20">Rate your favorite movies</h1>
 
-    <div class="grid gap-8 mt-20" :class="gridColsClass">
+    <div class="grid gap-8 mt-20" :class="gridCols">
       <div
         v-for="movie in favoriteMovies"
         :key="movie.movie_id"

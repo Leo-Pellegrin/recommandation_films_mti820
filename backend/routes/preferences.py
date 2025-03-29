@@ -7,6 +7,37 @@ from schemas import GenreList, ActorList, MovieIDList, MovieResponse
 
 router = APIRouter(prefix="", tags=["Preferences"])
 
+# --- ALL --- 
+@router.get("/{user_id}")
+def get_all_preferences(user_id: int, db: Session = Depends(get_db)):
+    pref = db.query(Preference).filter_by(user_id=user_id).first()
+    if not pref:
+        raise HTTPException(status_code=404, detail="Preferences not found")
+
+    favorites = (
+        db.query(UserMoviePreference)
+        .options(joinedload(UserMoviePreference.movie))
+        .filter(UserMoviePreference.user_id == user_id)
+        .all()
+    )
+
+    favorite_movies = [
+        {
+            "movie_id": fav.movie.movie_id,
+            "title": fav.movie.title,
+            "poster_path": fav.movie.poster_path or "/images/placeholder_movie.jpeg",
+            "year": fav.movie.year,
+            "genres": fav.movie.genres or []
+        }
+        for fav in favorites
+    ]
+
+    return {
+        "genres": pref.preferred_genres or [],
+        "actors": pref.preferred_actors or [],
+        "favorite_movies": favorite_movies
+    }
+
 # --- GENRES ---
 
 @router.get("/{user_id}/genres")

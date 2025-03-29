@@ -37,9 +37,9 @@ import { SearchBar } from '#components'
 // Définition des liens de navigation
 const links = [
   { label: "Home", to: "/" },
-  { label: "Movies", to: "/movies" },
-  { label: "News and Popular", to: "/news" },
-  { label: "Categories", to: "/categories" },
+  { label: "Movies",  },
+  { label: "News and Popular", },
+  { label: "Categories", },
 ];
 
 

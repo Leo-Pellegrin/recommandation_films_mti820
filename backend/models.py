@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import TEXT
 from database import Base
 from datetime import datetime  
-    
+
 class User(Base):
     __tablename__ = "users"
 
@@ -15,6 +15,7 @@ class User(Base):
 
     favorite_movies = relationship("UserMoviePreference", back_populates="user", cascade="all, delete")
     preferences = relationship("Preference", back_populates="user", uselist=False)
+    ratings = relationship("Rating", back_populates="user")
 
 class UserFeature(Base):
     __tablename__ = "user_features"
@@ -31,11 +32,11 @@ class Movie(Base):
     title = Column(String, index=True)
     year = Column(Integer, index=True)
     genres = Column(ARRAY(TEXT), index=True)
-    poster_path = Column(String) 
+    poster_path = Column(String)
 
-    
     link = relationship("Link", back_populates="movie", uselist=False)
-    
+    ratings = relationship("Rating", back_populates="movie")
+
 class MovieFeature(Base):
     __tablename__ = "movie_features"
 
@@ -53,16 +54,18 @@ class Rating(Base):
     rating = Column(Integer, index=True)
     timestamp = Column(DateTime, index=True)
 
+    movie = relationship("Movie", back_populates="ratings")
+    user = relationship("User", back_populates="ratings")
+
 class Link(Base):
     __tablename__ = "links"
 
     movie_id = Column(Integer, ForeignKey("movies.movie_id"), primary_key=True, index=True)
     imdb_id = Column(Integer, index=True)
     tmdb_id = Column(Integer, index=True)
-    
+
     movie = relationship("Movie", back_populates="link")
 
-    
 class Tag(Base):
     __tablename__ = "tags"
 
@@ -71,15 +74,15 @@ class Tag(Base):
     movie_id = Column(Integer, ForeignKey("movies.movie_id"))
     tag = Column(String, index=True)
     timestamp = Column(DateTime, index=True)
-    
+
 class Recommendation(Base):
     __tablename__ = "recommendations"
-    
+
     rec_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.user_id"))
     movie_id = Column(Integer, ForeignKey("movies.movie_id"))
     score = Column(Integer, index=True)
-    
+
 class UserMoviePreference(Base):
     __tablename__ = "user_movie_preferences"
 
@@ -101,4 +104,3 @@ class Preference(Base):
     created_at = Column(DateTime, default=datetime.now)
 
     user = relationship("User", back_populates="preferences")
-    
