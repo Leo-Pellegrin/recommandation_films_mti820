@@ -64,3 +64,13 @@ class ActorList(BaseModel):
 
 class MovieIDList(BaseModel):
     movie_ids: List[int]
+
+class UserRecommendationResponse(BaseModel):
+    movie_id: int
+    title: str
+    year: int
+    genres: List[str]
+    poster_path: str | None = None  
+    preference_score: float  
+
+    model_config = ConfigDict(from_attributes=True)
