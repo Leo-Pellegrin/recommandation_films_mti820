@@ -62,18 +62,29 @@ def add_user_ratings(user_id: int, ratings: List[RatingCreate], db: Session = De
     db.commit()
     return {"message": f"{len(ratings)} notations ajoutées avec succès"}
 
-# Ajouter un rating
+# Ajouter un rating ou modifier si il existe deja
 @router.post("/user/{user_id}/rating")
-def add_single_user_rating(user_id: int, rating: RatingCreate, db: Session = Depends(get_db)):
-    new_rating = Rating(
-        user_id=user_id,
-        movie_id=rating.movie_id,
-        rating=rating.rating,
-        timestamp=rating.timestamp or datetime.utcnow()  # fallback si non fourni
-    )
-    db.add(new_rating)
+def add_or_update_user_rating(user_id: int, rating: RatingCreate, db: Session = Depends(get_db)):
+    existing_rating = db.query(Rating).filter_by(user_id=user_id, movie_id=rating.movie_id).first()
+
+    if existing_rating:
+        # 🔁 Mettre à jour la note existante
+        existing_rating.rating = rating.rating
+        existing_rating.timestamp = rating.timestamp or datetime.utcnow()
+        message = "Notation mise à jour avec succès"
+    else:
+        # ➕ Créer une nouvelle note
+        new_rating = Rating(
+            user_id=user_id,
+            movie_id=rating.movie_id,
+            rating=rating.rating,
+            timestamp=rating.timestamp or datetime.utcnow()
+        )
+        db.add(new_rating)
+        message = "Notation ajoutée avec succès"
+
     db.commit()
-    return {"message": "Notation ajoutée avec succès"}
+    return {"message": message}
 
 # 🔹 Récupérer la moyenne d’un film
 @router.get("/movie/{movie_id}/average")

@@ -33,6 +33,7 @@ class Movie(Base):
     year = Column(Integer, index=True)
     genres = Column(ARRAY(TEXT), index=True)
     poster_path = Column(String)
+    actors = Column(ARRAY(TEXT), index=True)
 
     link = relationship("Link", back_populates="movie", uselist=False)
     ratings = relationship("Rating", back_populates="movie")

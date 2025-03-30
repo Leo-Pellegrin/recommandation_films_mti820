@@ -10,6 +10,7 @@ const route = useRoute()
 const userStore = useUserStore()
 const hoverRating = ref(0)
 const userRating = ref(0)
+const toast = useToast()
 
 interface Movie {
   id: number
@@ -74,7 +75,7 @@ async function submitRating(value: number) {
     })
 
     if (response.ok) {
-      console.log("✅ Note enregistrée")
+      toast.add({ title: 'Success', description: 'Rating saved', color: 'success' })
     } else {
       console.error("❌ Erreur serveur:", await response.text())
     }

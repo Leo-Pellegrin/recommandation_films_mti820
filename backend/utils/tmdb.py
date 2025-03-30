@@ -1,5 +1,7 @@
 import requests
 import os
+from models import Movie, Link
+from sqlalchemy.orm import Session
 
 TMDB_API_KEY = "166e544a3195c0c362b7c9294e90775d"
 TMDB_API_BASE = "https://api.themoviedb.org/3"
@@ -65,3 +67,25 @@ def fetch_poster_from_tmdb(tmdb_id: int):
     except Exception as e:
         print(f"❌ TMDB error for ID {tmdb_id}: {e}")
         return None
+    
+def populate_actors_for_movies(db: Session):
+    movies = db.query(Movie).all()
+
+    for movie in movies:
+        link = db.query(Link).filter(Link.movie_id == movie.movie_id).first()
+        if not link or not link.tmdb_id:
+            continue
+        
+        try:
+            response = requests.get(
+                f"https://api.themoviedb.org/3/movie/{link.tmdb_id}",
+                params={"api_key": TMDB_API_KEY, "language": "en-US", "append_to_response": "credits"}
+            )
+            data = response.json()
+            cast = [actor["name"] for actor in data.get("credits", {}).get("cast", [])[:3]]
+            movie.actors = cast
+            print(f"✅ {movie.title} : {cast}")
+        except Exception as e:
+            print(f"❌ Erreur pour le film ID {movie.movie_id} : {e}")
+
+    db.commit()

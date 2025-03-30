@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routes import auth, movies, users, ratings, links, preferences, recommandations
+from routes import auth, movies, users, ratings, links, preferences, recommandations, tools
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -19,6 +19,7 @@ app.include_router(ratings.router, prefix="/api/ratings", tags=["Ratings"])
 app.include_router(links.router, prefix="/api/links", tags=["Links"])
 app.include_router(recommandations.router, prefix="/api/recommendations", tags=["Recommandations"])
 app.include_router(preferences.router, prefix="/api/preferences", tags=["Preferences"])
+app.include_router(tools.router, prefix="/api/tools", tags=["Tools"])
 
 @app.get("/")
 def root():
