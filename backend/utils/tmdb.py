@@ -89,3 +89,32 @@ def populate_actors_for_movies(db: Session):
             print(f"❌ Erreur pour le film ID {movie.movie_id} : {e}")
 
     db.commit()
+    
+def fetch_actors_by_names(names: list[str]) -> list[dict]:
+    results = []
+
+    for name in names:
+        try:
+            response = requests.get(
+                "https://api.themoviedb.org/3/search/person",
+                params={
+                    "api_key": TMDB_API_KEY,
+                    "query": name,
+                    "language": "en-US",
+                    "page": 1
+                }
+            )
+            data = response.json()
+            person = data.get("results", [])[0] if data.get("results") else None
+
+            if person:
+                results.append({
+                    "id": person["id"],
+                    "name": person["name"],
+                    "profile_path": f"{TMDB_IMAGE_BASE_URL}{person['profile_path']}" if person.get("profile_path") else None
+                })
+
+        except Exception as e:
+            print(f"Erreur TMDB lors de la recherche de '{name}': {e}")
+
+    return results

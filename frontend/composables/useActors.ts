@@ -1,4 +1,4 @@
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 
 interface Actor {
   id: number
@@ -6,21 +6,20 @@ interface Actor {
   profilePath: string | null
 }
 
-// URL de base TMDB
+// URLs TMDB
 const TMDB_API_URL = 'https://api.themoviedb.org/3'
 const TMDB_API_KEY = '166e544a3195c0c362b7c9294e90775d'
 
 export function useActors() {
-  const allActors = ref<any[]>([]) // Tous les acteurs récupérés
-  const selectedActors = ref<any[]>([]) // Acteurs sélectionnés
-  const searchQuery = ref('') // Recherche d'acteurs
+  const allActors = ref<Actor[]>([]) // ✅ typé
+  const selectedActors = ref<Actor[]>([]) // ✅ typé
+  const searchQuery = ref('')
 
-  // Récupérer les acteurs populaires depuis TMDB
+  // 🔹 Charger les acteurs populaires
   async function fetchPopularActors() {
     try {
-      const uniqueActors = new Map()
+      const uniqueActors = new Map<number, Actor>()
 
-      // 🔁 Boucle sur les pages 1 à 5 (ajuste si besoin)
       for (let page = 1; page <= 5; page++) {
         const response = await fetch(`${TMDB_API_URL}/person/popular?api_key=${TMDB_API_KEY}&language=en-US&page=${page}`)
         const data = await response.json()
@@ -40,13 +39,13 @@ export function useActors() {
         }
       }
 
-      // Stocker les acteurs uniques
       allActors.value = Array.from(uniqueActors.values())
     } catch (error) {
       console.error('Erreur lors de la récupération des acteurs:', error)
     }
   }
 
+  // 🔹 Ajouter / retirer un acteur
   function toggleActor(actor: Actor) {
     const index = selectedActors.value.findIndex(a => a.id === actor.id)
     if (index > -1) {
@@ -56,22 +55,20 @@ export function useActors() {
     }
   }
 
+  // 🔹 Recherche + filtrage
   const displayedActors = computed(() => {
     const filtered = allActors.value.filter(
       (actor) => !selectedActors.value.some(selected => selected.id === actor.id)
     )
 
-    if (!searchQuery.value) {
-      //Toujours limiter à 12 en l'absence de recherche
-      return filtered.slice(0, 12)
-    }
+    if (!searchQuery.value) return filtered.slice(0, 12)
 
-    // En cas de recherche, ne pas tronquer à 12 pour voir tous les résultats correspondants
     return filtered.filter((actor) =>
       actor.name.toLowerCase().includes(searchQuery.value.toLowerCase())
     ).slice(0, 12)
   })
 
+  // 🔹 Recherche via l'API TMDB
   watch(searchQuery, async (query) => {
     if (!query) {
       fetchPopularActors()
@@ -98,7 +95,29 @@ export function useActors() {
     }
   })
 
-  // 🔹 Charger les acteurs populaires au montage
+  // 🔹 Mode édition : récupérer des acteurs à partir de noms
+  async function fetchActorsByNames(names: string[]) {
+    try {
+      const res = await fetch('http://localhost:8000/api/tools/actors/by-names', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ names })
+      })
+
+      const data = await res.json()
+      selectedActors.value = (data.actors || []).map((actor: any) => ({
+        id: actor.id,
+        name: actor.name,
+        profilePath: actor.profile_path ?? '/images/placeholder_actor.png'
+      }))
+    } catch (err) {
+      console.error('Erreur lors de la récupération des acteurs :', err)
+    }
+  }
+
+  // ✅ Init
   onMounted(fetchPopularActors)
 
   return {
@@ -106,6 +125,7 @@ export function useActors() {
     selectedActors,
     toggleActor,
     displayedActors,
-    searchQuery
+    searchQuery,
+    fetchActorsByNames
   }
 }

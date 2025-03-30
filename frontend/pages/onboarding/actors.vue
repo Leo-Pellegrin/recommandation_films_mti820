@@ -9,7 +9,7 @@ const route = useRoute()
 const userStore = useUserStore()
 const isEditMode = computed(() => route.path.includes('/edit-preferences'))
 
-const { displayedActors, selectedActors, toggleActor, searchQuery, fetchActorsByNames } = useActors()
+const { displayedActors, selectedActors, toggleActor, searchQuery,fetchActorsByNames } = useActors()
 
 // 🔹 Vérification de l'authentification (middleware)
 definePageMeta({
