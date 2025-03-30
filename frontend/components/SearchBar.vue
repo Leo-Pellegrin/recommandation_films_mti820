@@ -50,14 +50,14 @@ const groups = computed(() => [{
 </script>
 
 <template>
-  <UModal :title="'Search for a movie'" class="bg-zinc-900" :close="{ onClick: () => emit('close', false) }"
+  <UModal :title="'Search for a movie'" class="bg-zinc-900 text-white" :close="{ onClick: () => emit('close', false) }"
     :ui="{ overlay: 'fixed inset-0 bg-(--ui-bg-elevated)/75' }">
     <template #content>
       <UCommandPalette v-model:search-term="searchQuery" :loading="loading" :groups="groups"
-        placeholder="Search for a movie..." class="bg-zinc-900 shadow-2xl rounded-xl text-white" @update:model-value="(item: any) => {
-          navigateTo(`/movie/${item.id}`)
-          emit('close', false)
-        }">
+         placeholder="Search for a movie..." class="bg-zinc-900 shadow-2xl rounded-xl custom-input" @update:model-value="(item: any) => {
+      navigateTo(`/movie/${item.id}`)
+      emit('close', false)
+    }">
         <template #item-leading="{ item }">
           <img :src="item.avatar?.src || '/images/placeholder_movie.jpeg'" alt="Movie poster"
             class="w-32 h-48 rounded object-cover" />
@@ -66,3 +66,10 @@ const groups = computed(() => [{
     </template>
   </UModal>
 </template>
+
+<style scoped>
+.custom-input ::v-deep(input) {
+  color: white !important;
+  font-size: 0.7em;
+}
+</style>
