@@ -58,7 +58,7 @@ def get_collaborative_recommendations_user_based(user_id: int, db: Session, k: i
             year=movie_dict[movie_id].year,
             genres=movie_dict[movie_id].genres,
             posterPath=movie_dict[movie_id].poster_path,
-            preferenceScore=(score/weighted_ratings.max()) * 100
+            preferenceScore=round((score/weighted_ratings.max()) * 100,2)
         )
         for movie_id, score in sorted_recommendations.items()
         if movie_id in movie_dict
@@ -163,8 +163,6 @@ def get_content_based_recommendations(user_id: int, db: Session, k: int = 5) -> 
     max_score = top_recommendations["score"].max()
 
     # 9. Convertir en UserRecommendationResponse
-    if not max_score or pd.isna(max_score) or max_score == 0:
-        max_score = 1
 
     movie_responses = [
         UserRecommendationResponse(
@@ -173,7 +171,7 @@ def get_content_based_recommendations(user_id: int, db: Session, k: int = 5) -> 
             year=movie_dict[row.movie_id].year,
             genres=movie_dict[row.movie_id].genres,
             posterPath=movie_dict[row.movie_id].poster_path,
-            preferenceScore=row.score / max_score
+            preferenceScore=round((row.score / max_score)*100,2)
         )
         for row in top_recommendations.itertuples()
         if row.movie_id in movie_dict
@@ -193,21 +191,25 @@ def get_actor_based_recommendations(user_id: int, db: Session, k: int = 5) -> Li
 
     # 2. Récupérer les films avec des acteurs
     movies = db.query(Movie).all()
-    movie_scores = []
+    scored_movies = []
 
     for movie in movies:
         if not movie.actors:
             continue
         movie_actors = set(actor.lower() for actor in movie.actors)
         common_actors = preferred_actors.intersection(movie_actors)
-        if common_actors:
-            score = round(len(common_actors) / len(preferred_actors) * 100, 2)
-            movie_scores.append((movie, score))
+        match_count = len(common_actors)
+        if match_count > 0:
+            scored_movies.append((movie, match_count))
 
-    # 3. Trier les films selon le score de correspondance
-    top_matches = sorted(movie_scores, key=lambda x: x[1], reverse=True)[:k]
+    if not scored_movies:
+        return []
 
-    # 4. Construire les réponses
+    # 3. Normaliser les scores
+    max_common = max(score for _, score in scored_movies)
+    scored_movies = sorted(scored_movies, key=lambda x: x[1], reverse=True)[:k]
+
+    # 4. Construire la réponse
     movie_responses = [
         UserRecommendationResponse(
             movie_id=movie.movie_id,
@@ -215,21 +217,22 @@ def get_actor_based_recommendations(user_id: int, db: Session, k: int = 5) -> Li
             year=movie.year,
             genres=movie.genres,
             posterPath=movie.poster_path,
-            preferenceScore=score
+            preferenceScore=round((score / max_common) * 100, 2)
         )
-        for movie, score in top_matches
+        for movie, score in scored_movies
     ]
 
     return movie_responses
 
 
 
-# --- Filtrage hybride (User-based + Content-based + Item-based si souhaité) ---
+# --- Filtrage hybride (User-based + Content-based + Item-based + Actor-based ) ---
 def get_hybrid_recommendations(user_id: int, db: Session, k: int = 10) -> List[UserRecommendationResponse]:
     # 1. Obtenir les recommandations de chaque stratégie (top 50 pour couvrir plus large)
     user_recs = get_collaborative_recommendations_user_based(user_id, db, k=50)
     item_recs = get_collaborative_recommendations_item_based(user_id, db, k=50)
     content_recs = get_content_based_recommendations(user_id, db, k=50)
+    actors_recs = get_actor_based_recommendations(user_id, db, k=50)
 
     # 2. Créer un dictionnaire de score combiné
     score_dict = Counter()
@@ -247,10 +250,15 @@ def get_hybrid_recommendations(user_id: int, db: Session, k: int = 10) -> List[U
         score_dict[rec.movie_id] += rec.preferenceScore * 2  # Poids pour content-based
         movie_info[rec.movie_id] = rec
 
+    for rec in actors_recs:
+        score_dict[rec.movie_id] += rec.preferenceScore * 2  # Poids pour actor-based
+        movie_info[rec.movie_id] = rec
+
     # 3. Trier les films par score total
     top_movies = score_dict.most_common(k)
+    max_score = max(score for _, score in top_movies) or 1
 
-    # 4. Retourner les UserRecommendationResponse triés
+    # 4. Retourner les UserRecommendationResponse triés et normalisés entre 0 et 100
     hybrid_responses = [
         UserRecommendationResponse(
             movie_id=movie_info[movie_id].movie_id,
@@ -258,7 +266,7 @@ def get_hybrid_recommendations(user_id: int, db: Session, k: int = 10) -> List[U
             year=movie_info[movie_id].year,
             genres=movie_info[movie_id].genres,
             posterPath=movie_info[movie_id].posterPath,
-            preferenceScore=round(score, 2)
+            preferenceScore=round((score / max_score) * 100, 2)
         )
         for movie_id, score in top_movies
     ]
