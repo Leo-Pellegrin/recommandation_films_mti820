@@ -181,7 +181,6 @@ def get_content_based_recommendations(user_id: int, db: Session, k: int = 5) -> 
 
     return movie_responses
 
-
 # --- Filtrage basé sur les acteurs préférés ---
 def get_actor_based_recommendations(user_id: int, db: Session, k: int = 5) -> List[UserRecommendationResponse]:
     # 1. Récupérer les préférences de l'utilisateur
