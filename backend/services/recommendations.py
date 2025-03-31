@@ -122,7 +122,6 @@ def get_collaborative_recommendations_item_based(user_id: int, db: Session, k: i
 
     return movie_responses
 
-
 # --- Filtrage basé sur les genres préférés (TF-IDF) ---
 def get_content_based_recommendations(user_id: int, db: Session, k: int = 5) -> List[UserRecommendationResponse]:
     # 1. Récupérer les films et les préférences de l'utilisateur
@@ -227,37 +226,45 @@ def get_actor_based_recommendations(user_id: int, db: Session, k: int = 5) -> Li
 
 # --- Filtrage hybride (User-based + Content-based + Item-based + Actor-based ) ---
 def get_hybrid_recommendations(user_id: int, db: Session, k: int = 10) -> List[UserRecommendationResponse]:
-    # 1. Obtenir les recommandations de chaque stratégie (top 50 pour couvrir plus large)
+    # 1. Obtenir les recommandations de chaque stratégie
     user_recs = get_collaborative_recommendations_user_based(user_id, db, k=50)
     item_recs = get_collaborative_recommendations_item_based(user_id, db, k=50)
     content_recs = get_content_based_recommendations(user_id, db, k=50)
     actors_recs = get_actor_based_recommendations(user_id, db, k=50)
 
-    # 2. Créer un dictionnaire de score combiné
+    # 2. Définir les poids
+    weights = {
+        "user": 5,
+        "item": 3,
+        "content": 2,
+        "actor": 2
+    }
+
     score_dict = Counter()
     movie_info = {}
 
-    for rec in user_recs:
-        score_dict[rec.movie_id] += rec.preferenceScore * 5  # Poids pour user-based
-        movie_info[rec.movie_id] = rec
+    # 3. Fonction pour intégrer une source avec normalisation
+    def add_normalized_scores(recs, weight):
+        if not recs:
+            return
+        max_score = max(r.preferenceScore for r in recs) or 1
+        for r in recs:
+            norm_score = r.preferenceScore / max_score  # Normalisation 0-1
+            score_dict[r.movie_id] += norm_score * weight
+            if r.movie_id not in movie_info:
+                movie_info[r.movie_id] = r
 
-    for rec in item_recs:
-        score_dict[rec.movie_id] += rec.preferenceScore * 3  # Poids pour item-based
-        movie_info[rec.movie_id] = rec
+    # 4. Ajouter chaque type de recommandations
+    add_normalized_scores(user_recs, weights["user"])
+    add_normalized_scores(item_recs, weights["item"])
+    add_normalized_scores(content_recs, weights["content"])
+    add_normalized_scores(actors_recs, weights["actor"])
 
-    for rec in content_recs:
-        score_dict[rec.movie_id] += rec.preferenceScore * 2  # Poids pour content-based
-        movie_info[rec.movie_id] = rec
-
-    for rec in actors_recs:
-        score_dict[rec.movie_id] += rec.preferenceScore * 2  # Poids pour actor-based
-        movie_info[rec.movie_id] = rec
-
-    # 3. Trier les films par score total
+    # 5. Trier les scores combinés
     top_movies = score_dict.most_common(k)
-    max_score = max(score for _, score in top_movies) or 1
-
-    # 4. Retourner les UserRecommendationResponse triés et normalisés entre 0 et 100
+    max_total_score = max(score for _, score in top_movies) or 1
+    
+    # 6. Construire les réponses finales, normalisées sur 100
     hybrid_responses = [
         UserRecommendationResponse(
             movie_id=movie_info[movie_id].movie_id,
@@ -265,9 +272,53 @@ def get_hybrid_recommendations(user_id: int, db: Session, k: int = 10) -> List[U
             year=movie_info[movie_id].year,
             genres=movie_info[movie_id].genres,
             posterPath=movie_info[movie_id].posterPath,
-            preferenceScore=round((score / max_score) * 100, 2)
+            preferenceScore=round((score / max_total_score) * 100, 2)
         )
         for movie_id, score in top_movies
     ]
 
     return hybrid_responses
+
+def get_similar_movies(movie_id: int, db: Session, k: int = 10) -> List[UserRecommendationResponse]:
+    # 1. Récupérer toutes les notations
+    ratings = db.query(Rating).all()
+    if not ratings:
+        return []
+
+    # 2. Créer la matrice utilisateur-film
+    df = pd.DataFrame([{
+        "user_id": r.user_id,
+        "movie_id": r.movie_id,
+        "rating": r.rating
+    } for r in ratings])
+    user_item_matrix = df.pivot_table(index="user_id", columns="movie_id", values="rating").fillna(0)
+
+    # 3. Vérifier que le film existe
+    if movie_id not in user_item_matrix.columns:
+        return []
+
+    # 4. Calculer la similarité cosinus entre les films
+    item_sim_matrix = cosine_similarity(user_item_matrix.T)
+    item_sim_df = pd.DataFrame(item_sim_matrix, index=user_item_matrix.columns, columns=user_item_matrix.columns)
+
+    # 5. Récupérer les k films les plus similaires
+    similar_scores = item_sim_df[movie_id].drop(labels=[movie_id])
+    top_similar = similar_scores.sort_values(ascending=False).head(k)
+
+    # 6. Récupérer les films depuis la base
+    recommended_movies = db.query(Movie).filter(Movie.movie_id.in_(top_similar.index.tolist())).all()
+    movie_dict = {movie.movie_id: movie for movie in recommended_movies}
+    max_score = top_similar.max() or 1
+
+    # 7. Construire les réponses
+    return [
+        UserRecommendationResponse(
+            movie_id=movie.movie_id,
+            title=movie.title,
+            year=movie.year,
+            genres=movie.genres,
+            posterPath=movie.poster_path,
+            preferenceScore=round((top_similar[movie.movie_id] / max_score) * 100, 2)
+        )
+        for movie in recommended_movies if movie.movie_id in top_similar.index
+    ]

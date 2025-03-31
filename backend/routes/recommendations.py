@@ -10,7 +10,8 @@ from services.recommendations import (
     get_collaborative_recommendations_item_based,
     get_content_based_recommendations,
     get_actor_based_recommendations,
-    get_hybrid_recommendations
+    get_hybrid_recommendations,
+    get_similar_movies
 )
 
 router = APIRouter()
@@ -51,6 +52,13 @@ def recommend_actor_based(user_id: int, db: Session = Depends(get_db)):
 @router.get("/hybrid/{user_id}", response_model=List[UserRecommendationResponse])
 def recommend_hybrid(user_id: int, db: Session = Depends(get_db)):
     movies = get_hybrid_recommendations(user_id, db)
+    if not movies:
+        raise HTTPException(status_code=404, detail="Aucune recommandation hybride trouvée.")
+    return movies
+
+@router.get("/item/movies/{movie_id}", response_model=List[UserRecommendationResponse])
+def get_similar_movies_by_movies_id(movie_id: int, db: Session = Depends(get_db)):
+    movies = get_similar_movies(movie_id, db)
     if not movies:
         raise HTTPException(status_code=404, detail="Aucune recommandation hybride trouvée.")
     return movies

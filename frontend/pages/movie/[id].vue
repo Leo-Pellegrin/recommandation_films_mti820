@@ -29,35 +29,50 @@ const movie = ref<Movie | null>(null)
 
 onMounted(async () => {
   const id = route.params.id
-  const res = await fetch(`http://localhost:8000/api/movies/movie/${id}?user_id=${userStore.user?.id}`)
-  const data = await res.json()
+  try {
+    // 🔹 Récupération des infos du film
+    const res = await fetch(`http://localhost:8000/api/movies/movie/${id}?user_id=${userStore.user?.id}`)
+    const data = await res.json()
 
-  movie.value = {
-    id: data.movie_id,
-    title: data.title,
-    backdropPath: data.backdrop_path
-      ? `https://image.tmdb.org/t/p/w780${data.backdrop_path}`
-      : '/images/placeholder_backdrop.jpeg',
-    rating: data.rating,
-    releaseYear: data.release_year || 'N/A',
-    runtime: data.runtime ? `${Math.floor(data.runtime / 60)}h ${data.runtime % 60}m` : 'N/A',
-    genres: data.genres,
-    cast: data.cast,
-    summary: data.summary,
-    similar: data.similar.map((m: any) => ({
-      id: m.id,
-      title: m.title,
-      backdropPath: m.backdrop_path
-        ? `https://image.tmdb.org/t/p/w780${m.backdrop_path}`
-        : '/images/placeholder_movie.jpeg'
-    }))
+    movie.value = {
+      id: data.movie_id,
+      title: data.title,
+      backdropPath: data.backdrop_path
+        ? `https://image.tmdb.org/t/p/w780${data.backdrop_path}`
+        : '/images/placeholder_backdrop.jpeg',
+      rating: data.rating,
+      releaseYear: data.release_year || 'N/A',
+      runtime: data.runtime ? `${Math.floor(data.runtime / 60)}h ${data.runtime % 60}m` : 'N/A',
+      genres: data.genres,
+      cast: data.cast,
+      summary: data.summary,
+      similar: []
+    }
+
+    // 🔹 Récupération des recommandations depuis ton API
+    const recoRes = await fetch(`http://localhost:8000/api/recommendations/item/movies/${movie.value.id}`)
+    const recoData = await recoRes.json()
+    console.log(recoData)
+
+    movie.value.similar = Array.isArray(recoData)
+      ? recoData.map((m: any) => ({
+        id: m.movie_id,
+        title: m.title,
+        backdropPath: m.posterPath
+          ? `https://image.tmdb.org/t/p/w780${m.posterPath}`
+          : '/images/placeholder_movie.jpeg'
+      }))
+      : []
+
+    console.log(movie.value.similar)
+    if (data.rating) {
+      userRating.value = data.rating
+    }
+
+  } catch (error) {
+    console.error('Erreur lors de la récupération des données du film ou des recommandations :', error)
   }
 
-  console.log(movie.value)
-
-  if (data.rating) {
-    userRating.value = data.rating
-  }
 })
 
 async function submitRating(value: number) {
@@ -110,8 +125,8 @@ async function submitRating(value: number) {
                   userRating = i
                   submitRating(i)
                 }" :name="(hoverRating || userRating) >= i
-          ? 'material-symbols-kid-star'
-          : 'material-symbols-kid-star-outline-sharp'"
+                  ? 'material-symbols-kid-star'
+                  : 'material-symbols-kid-star-outline-sharp'"
                   class="text-2xl text-orange-400 cursor-pointer transition-colors" />
               </div>
             </div>
