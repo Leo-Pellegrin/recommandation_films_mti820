@@ -1,10 +1,8 @@
 export function useGenres() {
   const genres = ref([
-    'Action', 'Anime', 'Comedies', 'Documentaries',
-    'Drama', 'Fantasy', 'Horror', 'International',
-    'Kids & Family', 'Romance', 'Sci-Fi', 'Thriller'
+    'Action', ' Adventure', 'Animation', 'Crime', 'Children', 'Comedy', 'Documentary',
+    'Drama', 'Fantasy', 'Horror', ' IMAX', 'International', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'War', 'Western'
   ])
-
   const selectedGenres = ref<string[]>([])
 
   function toggleGenre(genre: string) {

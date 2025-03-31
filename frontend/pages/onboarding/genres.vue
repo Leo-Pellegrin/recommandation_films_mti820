@@ -89,7 +89,7 @@ async function submitSelection() {
       {{ isEditMode ? 'Update your favorite genres' : 'Select your favorite genres' }}
     </h2>
 
-    <div class="grid grid-cols-4 gap-20 mt-16">
+    <div class="grid grid-cols-5 gap-20 mt-16">
       <UButton
         v-for="genre in genres"
         :key="genre"

@@ -79,6 +79,27 @@ async function submitSelection() {
     console.error('Erreur lors de l\'envoi des films sélectionnés :', error)
   }
 }
+
+async function removeMovieFromFavorites(movieId: number) {
+  const userId = userStore.user?.id
+  if (!userId) return
+
+  try {
+    const res = await fetch(`http://localhost:8000/api/preferences/${userId}/favorites/movies/${movieId}`, {
+      method: 'DELETE',
+    })
+
+    if (!res.ok) {
+      const error = await res.json()
+      console.error('Erreur lors de la suppression du film :', error.detail)
+    } else {
+      selectedMovies.value = selectedMovies.value.filter(m => m.id !== movieId)
+    }
+  } catch (error) {
+    console.error('Erreur réseau :', error)
+  }
+}
+
 </script>
 <template>
   <div class="min-h-screen bg-black text-white flex flex-col p-12">
