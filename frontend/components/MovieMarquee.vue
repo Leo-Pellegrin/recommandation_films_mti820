@@ -9,7 +9,7 @@
           :key="movie.id"
           :id= "movie.id"
           :title="movie.title"
-          :posterPath="movie.posterPath"
+          :posterPath="movie.poster_path"
           :rating="movie.rating"
         />
       </div>

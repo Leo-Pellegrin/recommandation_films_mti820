@@ -5,7 +5,7 @@ from models import Movie
 from schemas import MovieResponse
 from typing import List
 
-from services.recommandations import (
+from services.recommendations import (
     get_collaborative_recommendations_user_based,
     get_collaborative_recommendations_item_based,
     get_content_based_recommendations,

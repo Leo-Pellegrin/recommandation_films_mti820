@@ -1,102 +1,74 @@
-// composables/useMovieCategories.ts
 import { ref, onMounted } from 'vue'
+import { useUserStore } from '~/store/userStore'
 
 interface Movie {
   id: number
   title: string
   posterPath: string
-  genreIds: number[]
+  genres: string[]
+  rating: number // ici : score de recommandation
 }
-
-interface Genre {
-  id: number
-  name: string
-}
-
-const TMDB_AUTH_HEADER = {
-  Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxNjZlNTQ0YTMxOTVjMGMzNjJiN2M5Mjk0ZTkwNzc1ZCIsIm5iZiI6MTYxMTkyMzU1NC4wMTMsInN1YiI6IjYwMTQwMDYyMTUxMWFhMDA0MDUwZTRiYyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.eBu8apq8f56k4Ld1E8C3pqtN62bH3BMs2hrfjKzotQA`,
-  Accept: 'application/json',
-}
-const TMDB_API_KEY = '166e544a3195c0c362b7c9294e90775d'
 
 export function useTopRatedMovies() {
-  const movieCategories = ref<Record<string, any[]>>({})
+  const userStore = useUserStore()
+  const movieCategories = ref<Record<string, Movie[]>>({})
   const loading = ref(true)
 
-  async function fetchGenres() {
-    const res = await fetch('http://localhost:8000/api/movies/genres')
-    const genres: string[] = await res.json()
-    // Initialiser les catégories
-    genres.slice(1).forEach((genre) => { // On ignore "(no genres listed)"
-      movieCategories.value[genre] = []
-    })
-  }
-
-  async function fetchMovies() {
-    const allMovies: any[] = []
-    for (let page = 1; page <= 20; page++) {
-      const url = `https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page=${page}&sort_by=vote_average.desc&without_genres=99,10755&vote_count.gte=200`
-
-      const res = await fetch(url, { headers: TMDB_AUTH_HEADER })
-      const data = await res.json()
-      allMovies.push(...data.results)
-    }
-
-    return allMovies
-  }
-
-  async function organizeMoviesByGenre() {
+  async function fetchHybridRecommendations() {
     try {
-      await fetchGenres()
-      const movies = await fetchMovies()
+      const userId = userStore.user?.id
+      if (!userId) throw new Error("Utilisateur non connecté")
+
+      const response = await fetch(`http://localhost:8000/api/recommendations/hybrid/${userId}`)
+      console.log(response.json())
+      const movies: Movie[] = await response.json()
+      console.log(movies)
+
+      if (!movies.length) {
+        movieCategories.value = {}
+        return
+      }
+
+      // Améliorer la qualité des images
+      movies.forEach((movie) => {
+        if (movie.posterPath?.includes('/w185')) {
+          movie.posterPath = movie.posterPath.replace('/w185', '/w500')
+        }
+      })
+
+      const ratings = movies.map((m) => m.rating ?? 0)
+      const maxRating = Math.max(...ratings)
+      const minRating = Math.min(...ratings)
+      const range = (maxRating - minRating) / 3
+
+      const buckets: Record<string, Movie[]> = {
+        '🟢 Highly Recommended': [],
+        '🟡 Moderately Recommended': [],
+        '🔴 Less Relevant': []
+      }
 
       for (const movie of movies) {
-        for (const genreId of movie.genre_ids) {
-          // Appel à TMDB pour obtenir les noms des genres
-          const genreName = await getGenreNameById(genreId)
-          if (movieCategories.value[genreName]) {
-            movieCategories.value[genreName].push({
-              id: movie.id,
-              title: movie.title,
-              posterPath: movie.backdrop_path
-                ? `https://image.tmdb.org/t/p/w780${movie.backdrop_path}`
-                : '/images/placeholder_movie.jpeg',
-              rating: movie.vote_average,
-            })
-          }
+        const score = movie.rating ?? 0
+
+        if (score >= minRating + 2 * range) {
+          buckets['🟢 Highly Recommended'].push(movie)
+        } else if (score >= minRating + range) {
+          buckets['🟡 Moderately Recommended'].push(movie)
+        } else {
+          buckets['🔴 Less Relevant'].push(movie)
         }
       }
 
-      for (const genre in movieCategories.value) {
-        if (movieCategories.value[genre].length === 0) {
-          delete movieCategories.value[genre]
-        }
-      }
-
+      movieCategories.value = buckets
+      console.log(movieCategories.value)
     } catch (e) {
-      console.error('Erreur lors du classement des films par genre', e)
+      console.error('Erreur lors de la récupération des recommandations hybrides :', e)
     } finally {
       loading.value = false
     }
   }
 
-  // Cette fonction mappe l'ID d'un genre à son nom
-  const genreMapCache = new Map<number, string>()
-
-  async function getGenreNameById(id: number): Promise<string> {
-    if (genreMapCache.has(id)) return genreMapCache.get(id)!
-
-    const res = await fetch(`https://api.themoviedb.org/3/genre/movie/list?language=en`, {
-      headers: TMDB_AUTH_HEADER
-    })
-    const data = await res.json()
-    for (const genre of data.genres) {
-      genreMapCache.set(genre.id, genre.name)
-    }
-    return genreMapCache.get(id) || 'Unknown'
-  }
-
-  onMounted(organizeMoviesByGenre)
+  onMounted(fetchHybridRecommendations)
 
   return {
     movieCategories,

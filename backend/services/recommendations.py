@@ -169,7 +169,7 @@ def get_content_based_recommendations(user_id: int, db: Session, k: int = 5) -> 
     return movie_responses
 
 # --- Filtrage hybride (User-based + Content-based + Item-based si souhaité) ---
-def get_hybrid_recommendations(user_id: int, db: Session, k: int = 10) -> List[MovieResponse]:
+def get_hybrid_recommendations(user_id: int, db: Session, k: int = 20) -> List[MovieResponse]:
     # 1. Obtenir les recommandations des différentes approches
     user_based_recs = get_collaborative_recommendations_user_based(user_id, db, k=50)
     content_based_recs = get_content_based_recommendations(user_id, db, k=50)
@@ -183,7 +183,11 @@ def get_hybrid_recommendations(user_id: int, db: Session, k: int = 10) -> List[M
         score_counter[movie.movie_id] += 2  # Poids moyen : content-based
 
     # 3. Récupérer les k meilleurs films par score total
-    top_movie_ids = [movie_id for movie_id, _ in score_counter.most_common(k)]
+    top_movie_ids_with_scores = score_counter.most_common(k)
+    top_movie_ids = [movie_id for movie_id, _ in top_movie_ids_with_scores]
+    
+    # Mapping des scores pour usage rapide
+    score_map = dict(top_movie_ids_with_scores)
 
     # 4. Récupérer les films depuis la base
     recommended_movies = db.query(Movie).filter(Movie.movie_id.in_(top_movie_ids)).all()
@@ -194,7 +198,9 @@ def get_hybrid_recommendations(user_id: int, db: Session, k: int = 10) -> List[M
             movie_id=movie.movie_id,
             title=movie.title,
             year=movie.year,
-            genres=movie.genres
+            genres=movie.genres,
+            poster_path=movie.poster_path,
+            rating=score_map.get(movie.movie_id) 
         ) for movie in recommended_movies
     ]
 

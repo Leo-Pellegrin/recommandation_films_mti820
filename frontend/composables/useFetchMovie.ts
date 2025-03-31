@@ -13,7 +13,7 @@ export function useFetchMovies(): { movies: Ref<Movie[]>; fetchMovies: () => Pro
   async function fetchMovies() {
     const { $api } = useNuxtApp() as unknown as { $api: AxiosInstance }
     try {
-      const response = await $api.get('/movies')
+      const response = await $api.get('/,ovies')
       movies.value = response.data
     } catch (error) {
       console.error('Erreur lors de la récupération des films', error)

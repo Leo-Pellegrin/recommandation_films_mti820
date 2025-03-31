@@ -7,6 +7,7 @@ class MovieBase(BaseModel):
     year: int
     genres: List[str]  
     poster_path: Optional[str] = None
+    rating: Optional[float] = None
 
 class MovieCreate(MovieBase):
     pass  # Aucun champ supplémentaire
@@ -14,7 +15,7 @@ class MovieCreate(MovieBase):
 class MovieResponse(MovieBase):
     movie_id: int
     model_config = ConfigDict(from_attributes=True)
-        
+    
 class UserCreate(BaseModel):
     username: str
     email: str
