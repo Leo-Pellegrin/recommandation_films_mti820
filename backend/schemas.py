@@ -81,3 +81,13 @@ class MovieDetailsResponse(BaseModel):
     summary: Optional[str] = None
     cast: List[str] = []
     similar: List[SimilarMovie] = []
+
+class UserRecommendationResponse(BaseModel):
+    movie_id: int
+    title: str
+    year: int
+    genres: List[str]
+    poster_path: str | None = None  
+    preference_score: float  
+
+    model_config = ConfigDict(from_attributes=True)

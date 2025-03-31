@@ -93,6 +93,7 @@ class UserMoviePreference(Base):
     user = relationship("User", back_populates="favorite_movies")
     movie = relationship("Movie")
 
+
 class Preference(Base):
     __tablename__ = "preferences"
 
