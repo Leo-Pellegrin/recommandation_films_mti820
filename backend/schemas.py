@@ -87,7 +87,7 @@ class UserRecommendationResponse(BaseModel):
     title: str
     year: int
     genres: List[str]
-    poster_path: str | None = None  
-    preference_score: float  
+    posterPath: str | None = None  
+    preferenceScore: float  
 
     model_config = ConfigDict(from_attributes=True)

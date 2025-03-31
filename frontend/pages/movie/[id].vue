@@ -49,7 +49,7 @@ onMounted(async () => {
       title: m.title,
       backdropPath: m.backdrop_path
         ? `https://image.tmdb.org/t/p/w780${m.backdrop_path}`
-        : '/images/placeholder_backdrop.jpeg'
+        : '/images/placeholder_movie.jpeg'
     }))
   }
 

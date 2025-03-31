@@ -57,8 +57,8 @@ def get_collaborative_recommendations_user_based(user_id: int, db: Session, k: i
             title=movie_dict[movie_id].title,
             year=movie_dict[movie_id].year,
             genres=movie_dict[movie_id].genres,
-            poster_path=movie_dict[movie_id].poster_path,
-            preference_score=(score/weighted_ratings.max()) * 100
+            posterPath=movie_dict[movie_id].poster_path,
+            preferenceScore=(score/weighted_ratings.max()) * 100
         )
         for movie_id, score in sorted_recommendations.items()
         if movie_id in movie_dict
@@ -113,8 +113,8 @@ def get_collaborative_recommendations_item_based(user_id: int, db: Session, k: i
             title=movie_dict[movie_id].title,
             year=movie_dict[movie_id].year,
             genres=movie_dict[movie_id].genres,
-            poster_path=movie_dict[movie_id].poster_path,
-            preference_score=round((score / global_max) * 100, 2)
+            posterPath=movie_dict[movie_id].poster_path,
+            preferenceScore=round((score / global_max) * 100, 2)
         )
         for movie_id, score in top_recommendations.items()
         if movie_id in movie_dict
@@ -172,8 +172,8 @@ def get_content_based_recommendations(user_id: int, db: Session, k: int = 5) -> 
             title=movie_dict[row.movie_id].title,
             year=movie_dict[row.movie_id].year,
             genres=movie_dict[row.movie_id].genres,
-            poster_path=movie_dict[row.movie_id].poster_path,
-            preference_score=row.score / max_score
+            posterPath=movie_dict[row.movie_id].poster_path,
+            preferenceScore=row.score / max_score
         )
         for row in top_recommendations.itertuples()
         if row.movie_id in movie_dict
@@ -214,8 +214,8 @@ def get_actor_based_recommendations(user_id: int, db: Session, k: int = 5) -> Li
             title=movie.title,
             year=movie.year,
             genres=movie.genres,
-            poster_path=movie.poster_path,
-            preference_score=score
+            posterPath=movie.poster_path,
+            preferenceScore=score
         )
         for movie, score in top_matches
     ]
@@ -236,15 +236,15 @@ def get_hybrid_recommendations(user_id: int, db: Session, k: int = 10) -> List[U
     movie_info = {}
 
     for rec in user_recs:
-        score_dict[rec.movie_id] += rec.preference_score * 5  # Poids pour user-based
+        score_dict[rec.movie_id] += rec.preferenceScore * 5  # Poids pour user-based
         movie_info[rec.movie_id] = rec
 
     for rec in item_recs:
-        score_dict[rec.movie_id] += rec.preference_score * 3  # Poids pour item-based
+        score_dict[rec.movie_id] += rec.preferenceScore * 3  # Poids pour item-based
         movie_info[rec.movie_id] = rec
 
     for rec in content_recs:
-        score_dict[rec.movie_id] += rec.preference_score * 2  # Poids pour content-based
+        score_dict[rec.movie_id] += rec.preferenceScore * 2  # Poids pour content-based
         movie_info[rec.movie_id] = rec
 
     # 3. Trier les films par score total
@@ -257,8 +257,8 @@ def get_hybrid_recommendations(user_id: int, db: Session, k: int = 10) -> List[U
             title=movie_info[movie_id].title,
             year=movie_info[movie_id].year,
             genres=movie_info[movie_id].genres,
-            poster_path=movie_info[movie_id].poster_path,
-            preference_score=round(score, 2)
+            posterPath=movie_info[movie_id].posterPath,
+            preferenceScore=round(score, 2)
         )
         for movie_id, score in top_movies
     ]
