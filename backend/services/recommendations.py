@@ -234,8 +234,8 @@ def get_hybrid_recommendations(user_id: int, db: Session, k: int = 10) -> List[U
 
     # 2. Définir les poids
     weights = {
-        "user": 5,
-        "item": 3,
+        "user": 3,
+        "item": 5,
         "content": 2,
         "actor": 2
     }

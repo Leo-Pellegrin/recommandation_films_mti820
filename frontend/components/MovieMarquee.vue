@@ -5,7 +5,7 @@
     <div class="overflow-x-auto no-scrollbar">
       <div class="flex space-x-10 w-max">
         <MovieCard v-for="movie in movies" :key="movie.id" :id="movie.id" :title="movie.title"
-          :posterPath="movie.posterPath" size="medium" />
+          :posterPath="movie.posterPath" :score="movie.score" size="medium" />
       </div>
     </div>
   </div>
@@ -18,7 +18,7 @@ defineProps<{
     id: number
     title: string
     posterPath: string
-    rating?: number
+    score?: number
   }[]
 }>()
 </script>

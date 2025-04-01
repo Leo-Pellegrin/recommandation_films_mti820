@@ -21,7 +21,7 @@ export function useTopRatedMovies() {
 
       const response = await fetch(`http://localhost:8000/api/recommendations/hybrid/${userId}`)
       const movies: Movie[] = await response.json()
-
+      
       if (!movies.length) {
         topRatedMovies.value = []
         return
@@ -40,7 +40,7 @@ export function useTopRatedMovies() {
 
       // Trier les films par score décroissant
       topRatedMovies.value = movies.sort((a, b) => (b.preferenceScore ?? 0) - (a.preferenceScore ?? 0))
-
+      
       console.log(topRatedMovies.value)
     } catch (e) {
       console.error('Erreur lors de la récupération des recommandations hybrides :', e)

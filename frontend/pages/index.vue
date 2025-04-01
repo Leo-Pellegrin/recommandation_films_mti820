@@ -17,7 +17,7 @@ const { topRatedMovies, loading } = useTopRatedMovies()
 
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 mx-auto">
       <MovieCard v-for="movie in topRatedMovies" :key="movie.movie_id" :id="movie.movie_id" :title="movie.title"
-        :posterPath="movie.posterPath" size="large" />
+        :posterPath="movie.posterPath" :score="movie.preferenceScore" size="large" />
     </div>
   </div>
 </template>

@@ -12,6 +12,13 @@ const hoverRating = ref(0)
 const userRating = ref(0)
 const toast = useToast()
 
+interface SimilarMovie {
+  id: number
+  title: string
+  backdropPath: string
+  score: number
+}
+
 interface Movie {
   id: number
   title: string
@@ -22,7 +29,7 @@ interface Movie {
   genres: string[]
   cast: string[]
   summary: string
-  similar: { id: number; title: string; backdropPath: string }[]
+  similar: SimilarMovie[]
 }
 
 const movie = ref<Movie | null>(null)
@@ -30,7 +37,6 @@ const movie = ref<Movie | null>(null)
 onMounted(async () => {
   const id = route.params.id
   try {
-    // 🔹 Récupération des infos du film
     const res = await fetch(`http://localhost:8000/api/movies/movie/${id}?user_id=${userStore.user?.id}`)
     const data = await res.json()
 
@@ -49,30 +55,27 @@ onMounted(async () => {
       similar: []
     }
 
-    // 🔹 Récupération des recommandations depuis ton API
+    if (data.rating) userRating.value = data.rating
+
+    // Appel des recommandations item-based
     const recoRes = await fetch(`http://localhost:8000/api/recommendations/item/movies/${movie.value.id}`)
     const recoData = await recoRes.json()
-    console.log(recoData)
 
-    movie.value.similar = Array.isArray(recoData)
-      ? recoData.map((m: any) => ({
-        id: m.movie_id,
-        title: m.title,
-        backdropPath: m.posterPath
-          ? `https://image.tmdb.org/t/p/w780${m.posterPath}`
-          : '/images/placeholder_movie.jpeg'
-      }))
-      : []
-
-    console.log(movie.value.similar)
-    if (data.rating) {
-      userRating.value = data.rating
+    if (Array.isArray(recoData)) {
+      movie.value.similar = recoData
+        .map((m: any) => ({
+          id: m.movie_id,
+          title: m.title,
+          backdropPath: m.posterPath
+            ? `https://image.tmdb.org/t/p/w780${m.posterPath}`
+            : '/images/placeholder_movie.jpeg',
+          score: m.preferenceScore
+        }))
+        .sort((a, b) => b.score - a.score) // ⬅️ tri décroissant
     }
-
   } catch (error) {
     console.error('Erreur lors de la récupération des données du film ou des recommandations :', error)
   }
-
 })
 
 async function submitRating(value: number) {
@@ -147,7 +150,8 @@ async function submitRating(value: number) {
         <MovieMarquee :key="movie.id" :title="'More movies like this one'" :movies="movie.similar.map(similar => ({
           id: similar.id,
           title: similar.title,
-          posterPath: similar.backdropPath
+          posterPath: similar.backdropPath,
+          score: similar.score
         }))" />
       </div>
     </div>
