@@ -4,6 +4,11 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: false },
+  runtimeConfig: {
+    public: {
+      tmdbApiKey: process.env.TMDB_API_KEY 
+    }
+  },
   modules: [
     '@pinia/nuxt',
     '@sidebase/nuxt-auth',

@@ -6,9 +6,13 @@ from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database import get_db
 from models import User
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Clé secrète pour signer le JWT
-SECRET_KEY = "your_secret_key_here"  # Remplace par une vraie clé secrète !
+SECRET_KEY = SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60  # Expiration du token
 

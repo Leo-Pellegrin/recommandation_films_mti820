@@ -47,7 +47,7 @@ onMounted(async () => {
         ? `https://image.tmdb.org/t/p/w780${data.backdrop_path}`
         : '/images/placeholder_backdrop.jpeg',
       rating: data.rating,
-      releaseYear: data.release_year || 'N/A',
+      releaseYear: data.year || 'N/A',
       runtime: data.runtime ? `${Math.floor(data.runtime / 60)}h ${data.runtime % 60}m` : 'N/A',
       genres: data.genres,
       cast: data.cast,

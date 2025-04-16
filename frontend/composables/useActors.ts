@@ -6,9 +6,10 @@ interface Actor {
   profilePath: string | null
 }
 
+const config = useRuntimeConfig()
 // URLs TMDB
 const TMDB_API_URL = 'https://api.themoviedb.org/3'
-const TMDB_API_KEY = '166e544a3195c0c362b7c9294e90775d'
+const TMDB_API_KEY = config.public.tmdbApiKey
 
 export function useActors() {
   const allActors = ref<Actor[]>([]) // ✅ typé

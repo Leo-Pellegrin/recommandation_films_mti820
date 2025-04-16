@@ -223,7 +223,6 @@ def get_actor_based_recommendations(user_id: int, db: Session, k: int = 5) -> Li
     return movie_responses
 
 
-
 # --- Filtrage hybride (User-based + Content-based + Item-based + Actor-based ) ---
 def get_hybrid_recommendations(user_id: int, db: Session, k: int = 10) -> List[UserRecommendationResponse]:
     # 1. Obtenir les recommandations de chaque stratégie

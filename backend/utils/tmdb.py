@@ -2,8 +2,13 @@ import requests
 import os
 from models import Movie, Link
 from sqlalchemy.orm import Session
+import os
+from dotenv import load_dotenv
 
-TMDB_API_KEY = "166e544a3195c0c362b7c9294e90775d"
+
+load_dotenv()
+
+TMDB_API_KEY = os.getenv("TMDB_API_KEY")
 TMDB_API_BASE = "https://api.themoviedb.org/3"
 TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w185"
 TMDB_FULL_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w780"
